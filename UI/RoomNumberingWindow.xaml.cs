@@ -33,6 +33,11 @@ namespace RevitExcelLink.UI
             TxtParamBloc.Text = settings.ParamBloc;
             TxtParamEtage.Text = settings.ParamEtage;
             TxtParamGmao.Text = settings.ParamGmao;
+            CbFillContents.IsChecked = settings.FillContents;
+            TxtElemBloc.Text = settings.ElemParamBloc;
+            TxtElemEtage.Text = settings.ElemParamEtage;
+            TxtElemGmao.Text = settings.ElemParamGmao;
+            TxtElemLocal.Text = settings.ElemParamLocal;
             _updating = false;
 
             Loaded += (s, e) => { TxtBloc.Focus(); TxtBloc.SelectAll(); };
@@ -135,6 +140,11 @@ namespace RevitExcelLink.UI
             Settings.ParamBloc = TxtParamBloc.Text.Trim();
             Settings.ParamEtage = TxtParamEtage.Text.Trim();
             Settings.ParamGmao = TxtParamGmao.Text.Trim();
+            Settings.FillContents = CbFillContents.IsChecked == true;
+            Settings.ElemParamBloc = TxtElemBloc.Text.Trim();
+            Settings.ElemParamEtage = TxtElemEtage.Text.Trim();
+            Settings.ElemParamGmao = TxtElemGmao.Text.Trim();
+            Settings.ElemParamLocal = TxtElemLocal.Text.Trim();
             DialogResult = true;
         }
     }

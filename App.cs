@@ -55,6 +55,16 @@ namespace RevitExcelLink
                 };
                 rooms.AddItem(numbering);
 
+                var fill = new PushButtonData("HBIM_FillElements", "Remplir les\néléments", assembly, typeof(FillElementsCommand).FullName)
+                {
+                    ToolTip = "Recopie dans chaque élément le bloc, l'étage, le n° GMAO et le n° du local qui le contient.",
+                    LongDescription = "Pour les modèles techniques (INC, HVAC…) : les locaux peuvent être dans ce modèle ou dans la maquette "
+                                      + "architecture liée. Remplit H_Bloc, H_Etage, H_Num_GMAO et NUM_LOCAL_GMAO.",
+                    LargeImage = Icons.Make(32, "⇣", Icons.HeloraDark),
+                    Image = Icons.Make(16, "⇣", Icons.HeloraDark)
+                };
+                rooms.AddItem(fill);
+
                 // --- Groupe « Helora BIM »
                 RibbonPanel info = application.CreateRibbonPanel(TabName, "Helora BIM");
 

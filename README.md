@@ -127,3 +127,12 @@ UI/Icons.cs                  Icônes dessinées en code
 3. **Échap** ouvre un menu : *Reprendre*, *Sauter 1 numéro*, *Aller au numéro…* (pour sauter plusieurs numéros ou revenir en arrière) ou *Terminer*. Un deuxième Échap termine.
 4. Si un numéro est déjà pris par une autre pièce, l'outil propose : utiliser le numéro libre suivant, attribuer quand même, ou annuler ce clic.
 5. Toute la session s'annule en une seule fois avec **Ctrl+Z**. La prochaine fois, la fenêtre repart du numéro suivant.
+6. Si la case **« Remplir aussi les éléments contenus dans chaque local »** est cochée, chaque clic remplit aussi les familles ponctuelles du local (équipements, appareils, mobilier, détecteurs…) : `H_Bloc`, `H_Etage`, `H_Num_GMAO` et `NUM_LOCAL_GMAO` (numéro complet du local).
+
+## 8. Remplir les éléments depuis les locaux (groupe Locaux)
+
+Pour les modèles techniques dont les pièces sont dans la maquette architecture liée (ou dans le modèle lui-même) :
+1. Choisissez les éléments à traiter (vue active, tout le modèle ou sélection) et où chercher les locaux (ce modèle et/ou chaque lien).
+2. Chaque famille ponctuelle reçoit les valeurs du local qui la contient (`HEL_BLOC` → `H_Bloc`, `HEL_Etage` → `H_Etage`, `H_Num_GMAO` → `H_Num_GMAO`, `Numéro` → `NUM_LOCAL_GMAO`).
+3. Le local est trouvé en plan, à la hauteur de son sol : un détecteur au plafond est donc bien rattaché à son local. Si des locaux se superposent, c'est celui de l'étage le plus proche sous l'élément qui compte.
+4. Le bilan permet de sélectionner les éléments hors de tout local. Les portes et fenêtres sont exclues.

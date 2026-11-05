@@ -60,6 +60,8 @@ namespace RevitExcelLink.Commands
             var skipped = new List<int>();
             var errors = new List<string>();
             var filter = new RoomPickFilter();
+            int elementsFilled = 0;
+            RoomLocator locator = settings.FillContents ? new RoomLocator(doc, true, null) : null;
 
             using (var group = new TransactionGroup(doc, "Numérotation des locaux"))
             {
@@ -130,10 +132,34 @@ namespace RevitExcelLink.Commands
                         AddProblem(problems, room, settings.ParamEtage, settings.Etage);
                         AddProblem(problems, room, settings.ParamGmao, RoomNumberFormat.Counter(current, settings.Digits));
 
+                        // Éléments contenus dans le local : mêmes valeurs
+                        int filledHere = 0;
+                        if (locator != null)
+                        {
+                            var values = new RoomValues
+                            {
+                                Bloc = settings.Bloc,
+                                Etage = settings.Etage,
+                                Gmao = RoomNumberFormat.Counter(current, settings.Digits),
+                                Number = next
+                            };
+                            Outline zone = RoomLocator.SearchZone(room);
+                            if (zone != null)
+                                foreach (FamilyInstance fi in RoomLocator.PointFamilies(doc, null, zone))
+                                {
+                                    XYZ pt = RoomLocator.PointOf(fi);
+                                    if (pt == null) continue;
+                                    Room found = locator.Find(pt);
+                                    if (found == null || found.Id.Value != room.Id.Value) continue;
+                                    if (ElementValueWriter.Fill(fi, values, settings, settings.OverwriteContents, problems) > 0) filledHere++;
+                                }
+                        }
+
                         if (t.Commit() == TransactionStatus.Committed)
                         {
                             index.Move(room.Id, oldNumber, next);
                             done.Add(next);
+                            elementsFilled += filledHere;
                             if (problems.Count > 0) errors.Add($"{next} : {string.Join(" ; ", problems.Distinct())}");
                             current++;
                         }
@@ -152,7 +178,7 @@ namespace RevitExcelLink.Commands
             settings.Start = current;
             settings.Save();
 
-            ShowSummary(settings, done, skipped, errors);
+            ShowSummary(settings, done, skipped, errors, elementsFilled, settings.FillContents);
             return done.Count > 0 ? Result.Succeeded : Result.Cancelled;
         }
 
@@ -225,7 +251,8 @@ namespace RevitExcelLink.Commands
             }
         }
 
-        private static void ShowSummary(NumberingSettings s, List<string> done, List<int> skipped, List<string> errors)
+        private static void ShowSummary(NumberingSettings s, List<string> done, List<int> skipped, List<string> errors,
+                                        int elementsFilled, bool fillContents)
         {
             if (done.Count == 0 && errors.Count == 0) return;
 
@@ -233,6 +260,7 @@ namespace RevitExcelLink.Commands
             {
                 MainInstruction = done.Count == 0 ? "Aucun local numéroté." : $"{done.Count} local(aux) numéroté(s)",
                 MainContent = (done.Count > 0 ? $"De {done.First()} à {done.Last()}." : "")
+                              + (fillContents && done.Count > 0 ? $"\n{elementsFilled} élément(s) contenu(s) dans ces locaux mis à jour." : "")
                               + (skipped.Count > 0
                                   ? "\nNuméros sautés : " + string.Join(", ", skipped.Distinct().OrderBy(n => n).Take(30)
                                         .Select(n => RoomNumberFormat.Counter(n, s.Digits)))

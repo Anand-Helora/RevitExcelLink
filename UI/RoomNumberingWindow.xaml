@@ -109,6 +109,10 @@
                 <Run Text="Échap" FontWeight="SemiBold" Foreground="{StaticResource HeloraDark}"/><Run Text=" : sauter un ou plusieurs numéros, ou terminer."/>
             </TextBlock>
 
+            <CheckBox x:Name="CbFillContents" Margin="0,12,0,0">
+                <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Remplir aussi les éléments contenus dans chaque local"/><LineBreak/><Run Foreground="{StaticResource HeloraMuted}" Text="Équipements, appareils, mobilier, détecteurs… (familles ponctuelles du modèle)"/></TextBlock>
+            </CheckBox>
+
             <Expander Header="Noms des paramètres" Margin="0,10,0,0" Foreground="{StaticResource HeloraMuted}">
                 <Grid Margin="0,6,0,0">
                     <Grid.ColumnDefinitions>
@@ -119,6 +123,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Bloc" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtParamBloc" Margin="0,2"/>
@@ -126,6 +135,16 @@
                     <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtParamEtage" Margin="0,2"/>
                     <TextBlock Grid.Row="2" Text="N° GMAO" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtParamGmao" Margin="0,2"/>
+
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="ÉLÉMENTS CONTENUS" Style="{StaticResource SectionTitle}" Margin="0,10,0,2"/>
+                    <TextBlock Grid.Row="4" Text="Bloc" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtElemBloc" Margin="0,2"/>
+                    <TextBlock Grid.Row="5" Text="Étage" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtElemEtage" Margin="0,2"/>
+                    <TextBlock Grid.Row="6" Text="N° GMAO" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="6" Grid.Column="1" x:Name="TxtElemGmao" Margin="0,2"/>
+                    <TextBlock Grid.Row="7" Text="N° du local" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="7" Grid.Column="1" x:Name="TxtElemLocal" Margin="0,2"/>
                 </Grid>
             </Expander>
         </StackPanel>

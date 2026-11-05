@@ -23,6 +23,14 @@ namespace RevitExcelLink.Core
         public string ParamEtage { get; set; } = "HEL_Etage";
         public string ParamGmao { get; set; } = "H_Num_GMAO";
 
+        // Éléments contenus dans le local
+        public bool FillContents { get; set; } = true;
+        public bool OverwriteContents { get; set; } = true;
+        public string ElemParamBloc { get; set; } = "H_Bloc";
+        public string ElemParamEtage { get; set; } = "H_Etage";
+        public string ElemParamGmao { get; set; } = "H_Num_GMAO";
+        public string ElemParamLocal { get; set; } = "NUM_LOCAL_GMAO";
+
         private static string FilePath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RevitExcelLink", "numerotation.json");
 
