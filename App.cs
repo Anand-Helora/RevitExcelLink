@@ -6,10 +6,11 @@ using RevitExcelLink.UI;
 
 namespace RevitExcelLink
 {
-    /// <summary>Chargée au démarrage de Revit : crée l'onglet « Excel Link » et ses deux boutons.</summary>
+    /// <summary>Chargée au démarrage de Revit : crée l'onglet « Helora BIM » et affiche la page de garde.</summary>
     public class App : IExternalApplication
     {
-        private const string TabName = "Excel Link";
+        private const string TabName = "Helora BIM";
+        private const string PanelName = "Excel Link";
 
         public Result OnStartup(UIControlledApplication application)
         {
@@ -18,7 +19,7 @@ namespace RevitExcelLink
                 try { application.CreateRibbonTab(TabName); }
                 catch { /* l'onglet existe déjà */ }
 
-                RibbonPanel panel = application.CreateRibbonPanel(TabName, "Données");
+                RibbonPanel panel = application.CreateRibbonPanel(TabName, PanelName);
                 string assembly = Assembly.GetExecutingAssembly().Location;
 
                 var export = new PushButtonData("RXL_Export", "Exporter\nvers Excel", assembly, typeof(ExportCommand).FullName)
@@ -41,11 +42,25 @@ namespace RevitExcelLink
 
                 panel.AddItem(export);
                 panel.AddItem(import);
+                panel.AddSeparator();
+
+                var about = new PushButtonData("RXL_About", "À propos", assembly, typeof(AboutCommand).FullName)
+                {
+                    ToolTip = "Helora BIM – Excel Link : version et page de présentation.",
+                    LargeImage = Icons.Make(32, "+", Icons.HeloraDark),
+                    Image = Icons.Make(16, "+", Icons.HeloraDark)
+                };
+                panel.AddItem(about);
+
+                // Page de garde une fois Revit complètement chargé (animation fluide)
+                application.ControlledApplication.ApplicationInitialized += (s, e) =>
+                    SplashWindow.ShowFor(application.ControlledApplication.VersionNumber);
+
                 return Result.Succeeded;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Excel Link", "Impossible de créer le ruban : " + ex.Message);
+                TaskDialog.Show("Helora BIM", "Impossible de créer le ruban : " + ex.Message);
                 return Result.Failed;
             }
         }

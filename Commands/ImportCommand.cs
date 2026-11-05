@@ -15,7 +15,7 @@ namespace RevitExcelLink.Commands
     [Transaction(TransactionMode.Manual)]
     public class ImportCommand : IExternalCommand
     {
-        private const string Title = "Importer depuis Excel";
+        private const string Title = "Helora BIM – Importer depuis Excel";
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {

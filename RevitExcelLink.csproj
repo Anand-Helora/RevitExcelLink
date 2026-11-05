@@ -14,7 +14,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>RevitExcelLink</RootNamespace>
     <AssemblyName>RevitExcelLink</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.5.0</Version>
 
     <!-- Copie les dépendances (ClosedXML…) dans le dossier de sortie -->
     <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <None Update="RevitExcelLink.addin" CopyToOutputDirectory="Never" />
+    <Resource Include="UI\Assets\*.png" />
   </ItemGroup>
 
   <!-- Déploiement automatique dans %AppData%\Autodesk\Revit\Addins\<version> (Revit doit être fermé) -->

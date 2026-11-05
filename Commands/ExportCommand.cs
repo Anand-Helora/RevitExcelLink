@@ -16,9 +16,9 @@ namespace RevitExcelLink.Commands
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            if (uidoc == null) { TaskDialog.Show("Exporter vers Excel", "Ouvrez d'abord un projet."); return Result.Cancelled; }
+            if (uidoc == null) { TaskDialog.Show("Helora BIM – Exporter vers Excel", "Ouvrez d'abord un projet."); return Result.Cancelled; }
             Document doc = uidoc.Document;
-            if (doc.IsFamilyDocument) { TaskDialog.Show("Exporter vers Excel", "Cette commande fonctionne dans un projet, pas dans l'éditeur de familles."); return Result.Cancelled; }
+            if (doc.IsFamilyDocument) { TaskDialog.Show("Helora BIM – Exporter vers Excel", "Cette commande fonctionne dans un projet, pas dans l'éditeur de familles."); return Result.Cancelled; }
 
             try
             {
@@ -39,7 +39,7 @@ namespace RevitExcelLink.Commands
 
                 // Le dialogue n'est affiché que s'il apporte une information (ou si le fichier ne s'ouvre pas)
                 if (!req.OpenAfter || summary.Notes.Count > 0 || summary.SkippedCategories.Count > 0)
-                    TaskDialog.Show("Exporter vers Excel", text);
+                    TaskDialog.Show("Helora BIM – Exporter vers Excel", text);
                 if (req.OpenAfter)
                     Process.Start(new ProcessStartInfo(req.FilePath) { UseShellExecute = true });
 
@@ -47,12 +47,12 @@ namespace RevitExcelLink.Commands
             }
             catch (IOException ex)
             {
-                TaskDialog.Show("Exporter vers Excel", "Impossible d'écrire le fichier. Est-il ouvert dans Excel ?\n\n" + ex.Message);
+                TaskDialog.Show("Helora BIM – Exporter vers Excel", "Impossible d'écrire le fichier. Est-il ouvert dans Excel ?\n\n" + ex.Message);
                 return Result.Failed;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Exporter vers Excel", "L'export a échoué :\n\n" + ex.Message);
+                TaskDialog.Show("Helora BIM – Exporter vers Excel", "L'export a échoué :\n\n" + ex.Message);
                 return Result.Failed;
             }
         }

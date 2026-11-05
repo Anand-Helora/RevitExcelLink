@@ -1,7 +1,7 @@
 <Window x:Class="RevitExcelLink.UI.ExportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Excel Link – Exporter vers Excel" Width="1180" Height="740" MinWidth="940" MinHeight="560"
+        Title="Helora BIM – Excel Link – Exporter vers Excel" Width="1180" Height="740" MinWidth="940" MinHeight="560"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <ResourceDictionary>
@@ -26,9 +26,9 @@
         <Border DockPanel.Dock="Top" Style="{StaticResource HeaderBand}">
             <DockPanel>
                 <ContentControl ContentTemplate="{StaticResource HeloraSigle}" VerticalAlignment="Center" Margin="0,0,14,0"/>
-                <TextBlock DockPanel.Dock="Right" Text="EXPORT REVIT → EXCEL" Foreground="{StaticResource HeloraTurquoise50}"
+                <TextBlock DockPanel.Dock="Right" Text="EXCEL LINK  ·  EXPORT REVIT → EXCEL" Foreground="{StaticResource HeloraTurquoise50}"
                            FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
-                <TextBlock Text="Excel Link" Foreground="White" FontFamily="{StaticResource HeloraTitleFont}" FontSize="22" VerticalAlignment="Center"/>
+                <TextBlock Foreground="White" FontFamily="{StaticResource HeloraTitleFont}" FontSize="22" VerticalAlignment="Center"><Run Text="Helora"/><Run Text=" BIM" Foreground="{StaticResource HeloraTurquoise50}"/></TextBlock>
             </DockPanel>
         </Border>
 

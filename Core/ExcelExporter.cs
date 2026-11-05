@@ -413,10 +413,10 @@ namespace RevitExcelLink.Core
             // Bandeau
             IXLRange band = ws.Range(1, 1, 3, 3);
             band.Style.Fill.BackgroundColor = Brand.DarkGreen;
-            ws.Cell(2, 2).Value = "+|  Excel Link";
+            ws.Cell(2, 2).Value = "+|  Helora BIM";
             ws.Cell(2, 2).Style.Font.FontSize = 18;
             ws.Cell(2, 2).Style.Font.FontColor = XLColor.White;
-            ws.Cell(2, 3).Value = formatted ? "NOMENCLATURES – MISE EN FORME" : "EXPORT REVIT → EXCEL";
+            ws.Cell(2, 3).Value = formatted ? "EXCEL LINK  ·  NOMENCLATURES – MISE EN FORME" : "EXCEL LINK  ·  EXPORT REVIT → EXCEL";
             ws.Cell(2, 3).Style.Font.FontColor = Brand.Turquoise50;
             ws.Cell(2, 3).Style.Font.Bold = true;
             ws.Cell(2, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;

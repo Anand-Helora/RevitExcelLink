@@ -1,9 +1,11 @@
-# Excel Link – add-in Revit d'export / import Excel
+# Helora BIM – Excel Link
+
+Add-in Revit d'export / import Excel. Au démarrage, Revit affiche une page de garde Helora BIM pendant 3 secondes (un clic la ferme).
 
 Interface et classeurs aux couleurs de la charte Helora : vert foncé #044550, turquoise #009E99 et ses nuances, orange #E16021 réservé aux signaux. La police Gotham Rounded est utilisée si elle est installée, sinon Segoe UI.
 
 Add-in personnel pour Revit 2025, 2026 et 2027 (une seule DLL compilée en .NET 8).
-Il ajoute un onglet **Excel Link** au ruban, avec deux boutons : **Exporter vers Excel** et **Importer depuis Excel**.
+Il ajoute un onglet **Helora BIM** au ruban (groupe **Excel Link**), avec deux boutons : **Exporter vers Excel** et **Importer depuis Excel**.
 
 ## 1. Compiler et installer
 
