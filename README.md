@@ -1,6 +1,6 @@
 # Helora BIM – Excel Link
 
-Add-in Revit d'export / import Excel. Au démarrage, Revit affiche une page de garde Helora BIM pendant 3 secondes (un clic la ferme).
+Add-in Revit d'export / import Excel. Au démarrage, Revit affiche une page de garde Helora BIM pendant 7 secondes (un clic la ferme).
 
 Interface et classeurs aux couleurs de la charte Helora : vert foncé #044550, turquoise #009E99 et ses nuances, orange #E16021 réservé aux signaux. La police Gotham Rounded est utilisée si elle est installée, sinon Segoe UI.
 
@@ -124,7 +124,7 @@ UI/Icons.cs                  Icônes dessinées en code
    - **Numéro** (Revit) = `B/N00/015`
    - **HEL_BLOC** = `B`, **HEL_Etage** = `0`
    - **H_Num_GMAO** = `015`, qui s'incrémente à chaque clic
-3. **Échap** ouvre un menu : *Reprendre*, *Sauter 1 numéro*, *Aller au numéro…* (pour sauter plusieurs numéros ou revenir en arrière) ou *Terminer*. Un deuxième Échap termine.
+3. Une **palette flottante** reste ouverte pendant la numérotation : prochain numéro en grand, **Sauter**, **Précédent**, **Aller au n°** (sauter plusieurs numéros), historique des derniers locaux, **Annuler le dernier** (remet le local et ses éléments dans leur état d'avant) et **Terminer**. Échap dans la vue termine aussi. La palette garde sa position d'une fois sur l'autre.
 4. Si un numéro est déjà pris par une autre pièce, l'outil propose : utiliser le numéro libre suivant, attribuer quand même, ou annuler ce clic.
 5. Toute la session s'annule en une seule fois avec **Ctrl+Z**. La prochaine fois, la fenêtre repart du numéro suivant.
 6. Si la case **« Remplir aussi les éléments contenus dans chaque local »** est cochée, chaque clic remplit aussi les familles ponctuelles du local (équipements, appareils, mobilier, détecteurs…) : `H_Bloc`, `H_Etage`, `H_Num_GMAO` et `NUM_LOCAL_GMAO` (numéro complet du local).

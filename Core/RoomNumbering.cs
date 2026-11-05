@@ -31,6 +31,10 @@ namespace RevitExcelLink.Core
         public string ElemParamGmao { get; set; } = "H_Num_GMAO";
         public string ElemParamLocal { get; set; } = "NUM_LOCAL_GMAO";
 
+        // Position de la palette (-1 = position par défaut)
+        public double PaletteLeft { get; set; } = -1;
+        public double PaletteTop { get; set; } = -1;
+
         private static string FilePath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RevitExcelLink", "numerotation.json");
 

@@ -106,7 +106,7 @@
             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource HeloraMuted}" Margin="0,12,0,0">
                 <Run Text="Cliquez ensuite sur les locaux un par un, sur la pièce ou sur son étiquette."/>
                 <LineBreak/>
-                <Run Text="Échap" FontWeight="SemiBold" Foreground="{StaticResource HeloraDark}"/><Run Text=" : sauter un ou plusieurs numéros, ou terminer."/>
+                <Run Text="Une palette reste ouverte pendant la numérotation pour "/><Run Text="sauter des numéros, revenir en arrière ou annuler le dernier local" FontWeight="SemiBold" Foreground="{StaticResource HeloraDark}"/><Run Text="."/>
             </TextBlock>
 
             <CheckBox x:Name="CbFillContents" Margin="0,12,0,0">
