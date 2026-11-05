@@ -51,11 +51,11 @@ namespace RevitExcelLink.Core
     /// <summary>Format des numéros de locaux Helora : BLOC/CODE-ÉTAGE/NUMÉRO, ex. B/N00/015.</summary>
     public static class RoomNumberFormat
     {
-        /// <summary>0 → N00, 2 → N02, -1 → S01, -3 → S03.</summary>
+        /// <summary>0 → N00, 2 → N02, -1 → S-1, -3 → S-3.</summary>
         public static string FloorCode(string etage)
         {
             if (!int.TryParse((etage ?? "").Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int n)) return "";
-            return n >= 0 ? "N" + n.ToString("00") : "S" + (-n).ToString("00");
+            return n >= 0 ? "N" + n.ToString("00") : "S-" + (-n).ToString(CultureInfo.InvariantCulture);
         }
 
         public static string Counter(int number, int digits) => number.ToString(new string('0', Math.Max(1, digits)));

@@ -117,7 +117,7 @@ UI/Icons.cs                  Icônes dessinées en code
 ## 7. Numérotation des locaux (onglet Helora BIM → groupe Locaux)
 
 1. Cliquez sur **Numéroter les locaux** et indiquez le **Bloc**, l'**Étage** et le **N° de départ**.
-   - Le code étage se calcule tout seul : `N00`, `N01`… pour les étages 0 et plus, `S01`, `S02`… pour les sous-sols. Il reste modifiable.
+   - Le code étage se calcule tout seul : `N00`, `N01`… pour les étages 0 et plus, `S-1`, `S-2`, `S-3`… pour les sous-sols. Il reste modifiable.
    - Si des locaux existent déjà sur ce bloc et cet étage, la fenêtre propose de continuer après le dernier numéro utilisé.
    - L'aperçu montre le premier numéro, par exemple `B/N00/015`.
 2. Cliquez sur les locaux **un par un**, sur la pièce ou sur son étiquette. Chaque clic remplit :
