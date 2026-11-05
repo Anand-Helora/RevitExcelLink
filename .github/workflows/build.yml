@@ -21,6 +21,23 @@ jobs:
       - name: Compiler
         run: dotnet build RevitExcelLink.csproj -c Release -p:SkipDeploy=true
 
+      - name: Signer la DLL (certificat Helora BIM)
+        shell: pwsh
+        env:
+          SIGNING_PFX: ${{ secrets.SIGNING_PFX }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if (-not $env:SIGNING_PFX) { Write-Host "Aucun certificat configuré : DLL non signée."; exit 0 }
+          $bytes = [Convert]::FromBase64String($env:SIGNING_PFX)
+          $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($bytes, $env:SIGNING_PASSWORD, 'Exportable')
+          $dll = "bin\Release\RevitExcelLink.dll"
+          $r = Set-AuthenticodeSignature -FilePath $dll -Certificate $cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" -ErrorAction SilentlyContinue
+          if (-not $r -or -not $r.SignerCertificate) {
+            Write-Host "Horodatage indisponible : signature sans horodatage."
+            $r = Set-AuthenticodeSignature -FilePath $dll -Certificate $cert -HashAlgorithm SHA256
+          }
+          Write-Host "Signataire : $($r.SignerCertificate.Subject)  (statut : $($r.Status))"
+
       - name: Préparer le dossier à copier dans Addins\2025
         shell: pwsh
         run: |
@@ -29,6 +46,8 @@ jobs:
           Copy-Item RevitExcelLink.addin $out
           Copy-Item bin\Release\*.dll "$out\RevitExcelLink"
           Copy-Item bin\Release\*.deps.json "$out\RevitExcelLink"
+          New-Item -ItemType Directory -Force "$out\RevitExcelLink\Certificat" | Out-Null
+          Copy-Item Signing\* "$out\RevitExcelLink\Certificat"
           Get-ChildItem -Recurse $out | Select-Object FullName
 
       - uses: actions/upload-artifact@v4

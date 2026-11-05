@@ -6,7 +6,7 @@
     <Assembly>RevitExcelLink\RevitExcelLink.dll</Assembly>
     <FullClassName>RevitExcelLink.App</FullClassName>
     <AddInId>6F3C2B7A-9E41-4C8D-A2F5-1B7D3E9C4A60</AddInId>
-    <VendorId>PERSO</VendorId>
-    <VendorDescription>Helora BIM – export / import Excel</VendorDescription>
+    <VendorId>HELORA</VendorId>
+    <VendorDescription>Helora BIM – Helora, Centres Hospitaliers Universitaires</VendorDescription>
   </AddIn>
 </RevitAddIns>
