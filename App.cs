@@ -23,11 +23,11 @@ namespace RevitExcelLink
 
                 var export = new PushButtonData("RXL_Export", "Exporter\nvers Excel", assembly, typeof(ExportCommand).FullName)
                 {
-                    ToolTip = "Exporte les paramètres des éléments choisis vers un fichier Excel.",
+                    ToolTip = "Exporte vers Excel les paramètres des éléments ou des nomenclatures.",
                     LongDescription = "Choisissez la portée, les catégories et les paramètres. Le fichier contient une feuille par catégorie, "
                                       + "avec un code couleur (occurrence, type, lecture seule) et des listes déroulantes.",
-                    LargeImage = Icons.Make(32, "↑", Icons.ExcelGreen),
-                    Image = Icons.Make(16, "↑", Icons.ExcelGreen)
+                    LargeImage = Icons.Make(32, "↑", Icons.HeloraTurquoise),
+                    Image = Icons.Make(16, "↑", Icons.HeloraTurquoise)
                 };
 
                 var import = new PushButtonData("RXL_Import", "Importer\ndepuis Excel", assembly, typeof(ImportCommand).FullName)
@@ -35,8 +35,8 @@ namespace RevitExcelLink
                     ToolTip = "Réimporte un fichier Excel modifié et met à jour les paramètres dans Revit.",
                     LongDescription = "Seules les cellules modifiées depuis l'export sont prises en compte. "
                                       + "Un aperçu permet de vérifier chaque modification avant de l'appliquer.",
-                    LargeImage = Icons.Make(32, "↓", Icons.ImportBlue),
-                    Image = Icons.Make(16, "↓", Icons.ImportBlue)
+                    LargeImage = Icons.Make(32, "↓", Icons.HeloraDark),
+                    Image = Icons.Make(16, "↓", Icons.HeloraDark)
                 };
 
                 panel.AddItem(export);

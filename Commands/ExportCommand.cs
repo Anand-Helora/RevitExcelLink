@@ -33,12 +33,15 @@ namespace RevitExcelLink.Commands
 
                 string text = $"{summary.Rows} ligne(s) exportée(s) dans {summary.Sheets} feuille(s).\n\n{req.FilePath}";
                 if (summary.SkippedCategories.Count > 0)
-                    text += "\n\nCatégories sans données ignorées : " + string.Join(", ", summary.SkippedCategories);
+                    text += "\n\nSans données, ignoré(es) : " + string.Join(", ", summary.SkippedCategories);
+                if (summary.Notes.Count > 0)
+                    text += "\n\n" + string.Join("\n", summary.Notes);
 
+                // Le dialogue n'est affiché que s'il apporte une information (ou si le fichier ne s'ouvre pas)
+                if (!req.OpenAfter || summary.Notes.Count > 0 || summary.SkippedCategories.Count > 0)
+                    TaskDialog.Show("Exporter vers Excel", text);
                 if (req.OpenAfter)
                     Process.Start(new ProcessStartInfo(req.FilePath) { UseShellExecute = true });
-                else
-                    TaskDialog.Show("Exporter vers Excel", text);
 
                 return Result.Succeeded;
             }

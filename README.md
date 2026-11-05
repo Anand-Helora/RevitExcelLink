@@ -1,5 +1,7 @@
 # Excel Link – add-in Revit d'export / import Excel
 
+Interface et classeurs aux couleurs de la charte Helora : vert foncé #044550, turquoise #009E99 et ses nuances, orange #E16021 réservé aux signaux. La police Gotham Rounded est utilisée si elle est installée, sinon Segoe UI.
+
 Add-in personnel pour Revit 2025, 2026 et 2027 (une seule DLL compilée en .NET 8).
 Il ajoute un onglet **Excel Link** au ruban, avec deux boutons : **Exporter vers Excel** et **Importer depuis Excel**.
 
@@ -34,6 +36,13 @@ Les références à l'API Revit viennent des paquets NuGet `Nice3point.Revit.Api
 4. **« Une ligne par type »** : une ligne par type au lieu d'une ligne par élément, avec les paramètres de type uniquement.
 5. **Profils** : enregistrent et rechargent une sélection (portée, catégories, colonnes). Ils sont rangés dans `%AppData%\RevitExcelLink\Profils`.
 
+### Export des nomenclatures (onglet « Nomenclatures »)
+- Toutes les nomenclatures du projet sont listées : quantitatifs, métrés de matériaux, listes de feuilles et de vues, nomenclatures de clés. Si une nomenclature est ouverte dans Revit, elle est cochée automatiquement.
+- **Modifiable** : une ligne par élément affiché (avec les filtres de la nomenclature), les colonnes et leurs en-têtes repris de la nomenclature, dans le même ordre de tri. Le fichier se **réimporte** comme un export de catégories.
+  Les colonnes calculées (formules, totaux, nombre, pourcentages) ne sont pas modifiables : elles ne sont pas exportées dans ce mode.
+- **Mise en forme** : copie fidèle de l'affichage Revit (titre, en-têtes, regroupements, totaux, cellules fusionnées, largeurs de colonnes). Ce fichier n'est **pas réimportable**.
+- Un aperçu des colonnes exportées s'affiche quand on clique sur une nomenclature.
+
 ### Le fichier Excel
 - Un onglet **Instructions** contient la légende et les règles.
 - Les nombres sont de vrais nombres, dans l'unité d'affichage du projet indiquée dans l'en-tête, par exemple `Hauteur [mm]`.
@@ -67,7 +76,7 @@ Les références à l'API Revit viennent des paquets NuGet `Nice3point.Revit.Api
 
 ## 4. Limites de cette v1
 - Pas de création ni de suppression d'éléments. Les lignes ajoutées sont ignorées, avec un avertissement.
-- Pas de nomenclatures, de pièces et espaces spécifiques, de modèles liés, ni de Google ou Morta.
+- Pas de création de pièces et espaces, de modèles liés, ni de Google ou Morta.
 - Les paramètres entiers de type « énumération » (sous-projet, par exemple) sont exportés sous forme de nombre.
 - Changer le **type** d'un élément (paramètre « Type ») n'est pas pris en charge : ce paramètre est en lecture seule.
 - Liste déroulante des éléments liés : elle n'est créée que si au moins un élément de la colonne a déjà une valeur, ce qui permet de savoir s'il s'agit de niveaux, de matériaux, etc.
@@ -87,6 +96,8 @@ Core/ExcelExporter.cs        Écriture du .xlsx
 Core/ExcelImporter.cs        Lecture et détection des modifications
 Core/ChangeApplier.cs        Application dans Revit et rapport
 Core/ExportProfile.cs        Profils JSON
+Core/ScheduleScanner.cs      Nomenclatures (modifiable et mise en forme)
+UI/Theme.xaml                Thème Helora (couleurs, boutons, onglets)
 UI/ExportWindow.xaml(.cs)    Fenêtre d'export
 UI/ImportPreviewWindow…      Aperçu de l'import
 UI/Icons.cs                  Icônes dessinées en code

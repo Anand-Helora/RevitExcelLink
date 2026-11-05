@@ -40,6 +40,10 @@ namespace RevitExcelLink.Core
                 if (!wb.Worksheets.TryGetWorksheet(MetaSheet, out IXLWorksheet meta))
                     throw new InvalidDataException("Ce fichier n'a pas été créé par l'export de cet add-in (feuille « _meta » absente).");
 
+                if (meta.Cell(1, 1).GetString() == FormattedMarker)
+                    throw new InvalidDataException("Ce fichier a été exporté avec la mise en forme des nomenclatures : il n'est pas réimportable.\n\n"
+                        + "Pour modifier des valeurs, exportez la nomenclature en mode « Modifiable ».");
+
                 int lastMetaRow = meta.LastRowUsed()?.RowNumber() ?? 1;
                 for (int mr = 2; mr <= lastMetaRow; mr++)
                 {

@@ -28,16 +28,21 @@ namespace RevitExcelLink.Core
         public const string ModeInstance = "Instance";
         public const string ModeType = "Type";
 
-        // Couleurs (même logique que la légende de l'onglet Instructions)
-        public static readonly XLColor HeaderInstance = XLColor.FromHtml("#C6EFCE");
-        public static readonly XLColor HeaderType = XLColor.FromHtml("#FFEB9C");
-        public static readonly XLColor HeaderReadOnly = XLColor.FromHtml("#FFC7CE");
-        public static readonly XLColor HeaderFixed = XLColor.FromHtml("#D9D9D9");
+        /// <summary>Marqueur d'un classeur « mise en forme » (non réimportable).</summary>
+        public const string FormattedMarker = "NON_REIMPORTABLE";
 
-        public static readonly XLColor CellTypeParam = XLColor.FromHtml("#FFF7D6");
-        public static readonly XLColor CellReadOnly = XLColor.FromHtml("#FDE2E4");
-        public static readonly XLColor CellAbsent = XLColor.FromHtml("#BFBFBF");
-        public static readonly XLColor CellFixed = XLColor.FromHtml("#F2F2F2");
+        // Couleurs Helora (même logique que la légende de l'onglet Instructions)
+        public static readonly XLColor HeaderInstance = Brand.Turquoise;
+        public static readonly XLColor HeaderType = Brand.Turquoise50;
+        public static readonly XLColor HeaderReadOnly = XLColor.FromHtml("#E6ECED");
+        public static readonly XLColor HeaderReadOnlyText = Brand.Orange;   // petite touche d'orange = signal
+        public static readonly XLColor HeaderFixed = Brand.DarkGreen;
+
+        public static readonly XLColor CellTypeParam = Brand.Turquoise10;
+        public static readonly XLColor CellReadOnly = XLColor.FromHtml("#F3F5F5");
+        public static readonly XLColor CellReadOnlyText = XLColor.FromHtml("#7A8B8E");
+        public static readonly XLColor CellAbsent = XLColor.FromHtml("#C9D1D2");
+        public static readonly XLColor CellFixed = Brand.DarkGreen10;
 
         /// <summary>Lit une cellule en tenant compte des formules (valeur calculée en cache).</summary>
         public static CellValue ReadCell(IXLCell cell)
@@ -61,5 +66,17 @@ namespace RevitExcelLink.Core
             CellValue v = ReadCell(cell);
             return v.Number.HasValue ? ValueCodec.FormatNumber(v.Number.Value) : (v.Text ?? "").Trim();
         }
+    }
+
+    /// <summary>Palette de la charte graphique Helora.</summary>
+    public static class Brand
+    {
+        public static readonly XLColor DarkGreen = XLColor.FromHtml("#044550");   // vert foncé – Pantone 3165 C
+        public static readonly XLColor Turquoise = XLColor.FromHtml("#009E99");   // turquoise – Pantone 326 C
+        public static readonly XLColor Turquoise50 = XLColor.FromHtml("#80CFCC");
+        public static readonly XLColor Turquoise20 = XLColor.FromHtml("#CCECEB");
+        public static readonly XLColor Turquoise10 = XLColor.FromHtml("#E6F5F5");
+        public static readonly XLColor DarkGreen10 = XLColor.FromHtml("#E6ECEE");
+        public static readonly XLColor Orange = XLColor.FromHtml("#E16021");      // orange – petites touches uniquement
     }
 }

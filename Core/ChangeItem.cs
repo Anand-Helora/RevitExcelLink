@@ -72,10 +72,10 @@ namespace RevitExcelLink.Core
             {
                 switch (Status)
                 {
-                    case ChangeStatus.Change: return "#2E7D32";
-                    case ChangeStatus.Conflict: return "#E65100";
-                    case ChangeStatus.ReadOnly: return "#757575";
-                    default: return "#C62828";
+                    case ChangeStatus.Change: return "#009E99";    // turquoise Helora
+                    case ChangeStatus.Conflict: return "#E16021";  // orange Helora (signal)
+                    case ChangeStatus.ReadOnly: return "#7A8B8E";
+                    default: return "#B3261E";
                 }
             }
         }

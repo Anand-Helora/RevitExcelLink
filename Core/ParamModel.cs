@@ -78,8 +78,14 @@ namespace RevitExcelLink.Core
         public List<ElementId> ElementIds { get; } = new List<ElementId>();
     }
 
+    public enum ExportKind { Categories, Schedules }
+
     public sealed class ExportRequest
     {
+        public ExportKind Kind { get; set; } = ExportKind.Categories;
+        public List<ElementId> ScheduleIds { get; set; } = new List<ElementId>();
+        public bool ScheduleFormatted { get; set; }   // true = mise en forme Revit, non réimportable
+
         public List<CategoryData> Categories { get; set; } = new List<CategoryData>();
         public List<ParamDescriptor> Parameters { get; set; } = new List<ParamDescriptor>();
         public bool ByType { get; set; }

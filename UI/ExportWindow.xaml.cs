@@ -43,9 +43,10 @@ namespace RevitExcelLink.UI
 
     public sealed class ParamItem
     {
-        private static readonly Brush InstanceBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)));
-        private static readonly Brush TypeBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0xC1, 0x07)));
-        private static readonly Brush ReadOnlyBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xE5, 0x73, 0x73)));
+        // Palette Helora : turquoise, turquoise 50 %, orange (signal)
+        private static readonly Brush InstanceBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x00, 0x9E, 0x99)));
+        private static readonly Brush TypeBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x80, 0xCF, 0xCC)));
+        private static readonly Brush ReadOnlyBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xE1, 0x60, 0x21)));
 
         public ParamDescriptor Desc { get; }
         public ParamItem(ParamDescriptor d) { Desc = d; }
@@ -56,6 +57,30 @@ namespace RevitExcelLink.UI
                                  + (Desc.IsReadOnly ? "\nLecture seule" : "");
 
         private static Brush Freeze(Brush b) { b.Freeze(); return b; }
+    }
+
+    public sealed class ScheduleItem : INotifyPropertyChanged
+    {
+        private bool _isChecked;
+        public ScheduleInfo Info { get; }
+        public Action Changed { get; set; }
+        public ScheduleItem(ScheduleInfo info) { Info = info; }
+
+        public string KindSuffix => "   " + Info.Kind;
+
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked == value) return;
+                _isChecked = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsChecked)));
+                Changed?.Invoke();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public partial class ExportWindow : Window
@@ -69,6 +94,9 @@ namespace RevitExcelLink.UI
         public ObservableCollection<CategoryItem> Categories { get; } = new ObservableCollection<CategoryItem>();
         public ObservableCollection<ParamItem> Available { get; } = new ObservableCollection<ParamItem>();
         public ObservableCollection<ParamItem> Selected { get; } = new ObservableCollection<ParamItem>();
+        public ObservableCollection<ScheduleItem> Schedules { get; } = new ObservableCollection<ScheduleItem>();
+        public ObservableCollection<ParamItem> ScheduleColumns { get; } = new ObservableCollection<ParamItem>();
+        private ICollectionView _schedView;
 
         /// <summary>Demande d'export, renseignée quand l'utilisateur valide.</summary>
         public ExportRequest Result { get; private set; }
@@ -90,6 +118,8 @@ namespace RevitExcelLink.UI
             // Une sélection dans Revit = portée « Sélection courante » par défaut
             if (_uidoc.Selection.GetElementIds().Count > 0) RbSelection.IsChecked = true;
             else LoadCategories();
+
+            LoadSchedules();
         }
 
         private ExportScope CurrentScope =>
@@ -224,11 +254,73 @@ namespace RevitExcelLink.UI
 
         private void UpdateStatus()
         {
+            if (TxtStatus == null) return;
+            if (Tabs != null && IsScheduleTab)
+            {
+                TxtStatus.Text = $"{Schedules.Count(x => x.IsChecked)} nomenclature(s) cochée(s) sur {Schedules.Count}";
+                return;
+            }
             int cats = Categories.Count(c => c.IsChecked);
             int elems = Categories.Where(c => c.IsChecked).Sum(c => c.Data.ElementIds.Count);
             TxtStatus.Text = Categories.Count == 0
                 ? "Aucun élément dans cette portée."
                 : $"{cats} catégorie(s), {elems} élément(s), {Selected.Count} colonne(s)";
+        }
+
+        // ---------- Nomenclatures ----------
+
+        private bool IsScheduleTab => Tabs.SelectedItem == TabSchedules;
+
+        private void LoadSchedules()
+        {
+            _schedView = CollectionViewSource.GetDefaultView(Schedules);
+            _schedView.Filter = o => Matches(((ScheduleItem)o).Info.Name, TxtSchedSearch.Text);
+
+            DB.ElementId activeId = (_doc.ActiveView as DB.ViewSchedule)?.Id;
+            foreach (ScheduleInfo info in ScheduleScanner.List(_doc))
+            {
+                var item = new ScheduleItem(info) { IsChecked = activeId != null && info.Id == activeId };
+                item.Changed = UpdateStatus;
+                Schedules.Add(item);
+            }
+
+            // Nomenclature ouverte dans Revit : on arrive directement sur l'onglet Nomenclatures
+            ScheduleItem active = Schedules.FirstOrDefault(s => s.IsChecked);
+            if (active != null)
+            {
+                Tabs.SelectedItem = TabSchedules;
+                LstSchedules.SelectedItem = active;
+                LstSchedules.ScrollIntoView(active);
+            }
+        }
+
+        private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!ReferenceEquals(e.OriginalSource, Tabs)) return;   // ignore les listes internes
+            if (ProfilePanel != null) ProfilePanel.Visibility = IsScheduleTab ? Visibility.Collapsed : Visibility.Visible;
+            UpdateStatus();
+        }
+
+        private void SchedSearch_Changed(object sender, TextChangedEventArgs e) => _schedView?.Refresh();
+        private void CheckAllSched_Click(object sender, RoutedEventArgs e) { foreach (ScheduleItem s in _schedView.Cast<ScheduleItem>()) s.IsChecked = true; }
+        private void UncheckAllSched_Click(object sender, RoutedEventArgs e) { foreach (ScheduleItem s in _schedView.Cast<ScheduleItem>()) s.IsChecked = false; }
+
+        private void Schedule_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ScheduleColumns.Clear();
+            TxtSchedSkipped.Text = "";
+            if (!(LstSchedules.SelectedItem is ScheduleItem item)) return;
+            if (!(_doc.GetElement(item.Info.Id) is DB.ViewSchedule schedule)) return;
+
+            ScheduleContent content;
+            using (new WaitCursor())
+                content = ScheduleScanner.BuildEditable(_doc, schedule);
+
+            foreach (ParamDescriptor d in content.Descriptors) ScheduleColumns.Add(new ParamItem(d));
+            TxtSchedInfo.Text = $"{item.Info.Name} – {item.Info.Kind}\n{content.Rows.Count} élément(s), {content.Descriptors.Count} colonne(s) en mode Modifiable.";
+            if (content.Skipped.Count > 0)
+                TxtSchedSkipped.Text = "Colonnes calculées (formules, totaux…), présentes seulement en mode Mise en forme : "
+                                       + string.Join(", ", content.Skipped);
         }
 
         // ---------- Profils ----------
@@ -304,15 +396,24 @@ namespace RevitExcelLink.UI
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
+            bool schedules = IsScheduleTab;
             var cats = Categories.Where(c => c.IsChecked).Select(c => c.Data).ToList();
-            if (cats.Count == 0) { Warn("Cochez au moins une catégorie."); return; }
-            if (Selected.Count == 0) { Warn("Ajoutez au moins un paramètre dans la liste de droite."); return; }
+            var schedIds = Schedules.Where(s => s.IsChecked).Select(s => s.Info.Id).ToList();
+            if (schedules)
+            {
+                if (schedIds.Count == 0) { Warn("Cochez au moins une nomenclature."); return; }
+            }
+            else
+            {
+                if (cats.Count == 0) { Warn("Cochez au moins une catégorie."); return; }
+                if (Selected.Count == 0) { Warn("Ajoutez au moins un paramètre dans la liste de droite."); return; }
+            }
 
             string safeTitle = string.Concat(_doc.Title.Split(Path.GetInvalidFileNameChars()));
             var dlg = new SaveFileDialog
             {
                 Filter = "Classeur Excel (*.xlsx)|*.xlsx",
-                FileName = $"{safeTitle}_export_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                FileName = $"{safeTitle}_{(schedules ? "nomenclatures" : "export")}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
                 InitialDirectory = UserSettings.LastFolder
             };
             if (dlg.ShowDialog(this) != true) return;
@@ -320,6 +421,9 @@ namespace RevitExcelLink.UI
 
             Result = new ExportRequest
             {
+                Kind = schedules ? ExportKind.Schedules : ExportKind.Categories,
+                ScheduleIds = schedIds,
+                ScheduleFormatted = schedules && RbSchedFormatted.IsChecked == true,
                 Categories = cats,
                 Parameters = Selected.Select(p => p.Desc).ToList(),
                 ByType = CbByType.IsChecked == true,

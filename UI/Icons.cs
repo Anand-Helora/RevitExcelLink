@@ -28,7 +28,7 @@ namespace RevitExcelLink.UI
             return bmp;
         }
 
-        public static readonly Color ExcelGreen = Color.FromRgb(0x21, 0x73, 0x46);
-        public static readonly Color ImportBlue = Color.FromRgb(0x1E, 0x5A, 0xA8);
+        public static readonly Color HeloraTurquoise = Color.FromRgb(0x00, 0x9E, 0x99);
+        public static readonly Color HeloraDark = Color.FromRgb(0x04, 0x45, 0x50);
     }
 }

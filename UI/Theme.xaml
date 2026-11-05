@@ -1,0 +1,199 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===== Palette Helora ===== -->
+    <SolidColorBrush x:Key="HeloraDark" Color="#044550"/>
+    <SolidColorBrush x:Key="HeloraTurquoise" Color="#009E99"/>
+    <SolidColorBrush x:Key="HeloraTurquoise50" Color="#80CFCC"/>
+    <SolidColorBrush x:Key="HeloraTurquoise20" Color="#CCECEB"/>
+    <SolidColorBrush x:Key="HeloraTurquoise10" Color="#E6F5F5"/>
+    <SolidColorBrush x:Key="HeloraOrange" Color="#E16021"/>
+    <SolidColorBrush x:Key="HeloraLine" Color="#D3E2E4"/>
+    <SolidColorBrush x:Key="HeloraMuted" Color="#5E7A80"/>
+
+    <!-- Gotham Rounded si installée, sinon Segoe UI -->
+    <FontFamily x:Key="HeloraFont">Gotham Rounded Book, Gotham Rounded, Segoe UI</FontFamily>
+    <FontFamily x:Key="HeloraTitleFont">Gotham Rounded Light, Gotham Rounded, Segoe UI Light</FontFamily>
+
+    <!-- ===== Fenêtre ===== -->
+    <Style x:Key="HeloraWindow" TargetType="Window">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="FontFamily" Value="{StaticResource HeloraFont}"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <!-- Titre de section : majuscules turquoise, comme les sous-titres de la charte -->
+    <Style x:Key="SectionTitle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource HeloraTurquoise}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraLine}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="10"/>
+    </Style>
+
+    <!-- ===== Boutons (pilules arrondies) ===== -->
+    <Style x:Key="BaseButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,5"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="14"/>
+                        <Border x:Name="Hover" Background="{StaticResource HeloraTurquoise}" CornerRadius="14" Opacity="0"/>
+                        <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Hover" Property="Opacity" Value="0.12"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Hover" Property="Opacity" Value="0.25"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="Button" BasedOn="{StaticResource BaseButton}"/>
+    <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+        <Setter Property="Background" Value="{StaticResource HeloraTurquoise}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraTurquoise}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="20,5"/>
+    </Style>
+    <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource HeloraTurquoise}"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="MinHeight" Value="24"/>
+    </Style>
+
+    <!-- ===== Champs ===== -->
+    <Style TargetType="TextBox">
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraLine}"/>
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="Padding" Value="5,3"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ===== Listes ===== -->
+    <Style TargetType="ListBox">
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraLine}"/>
+        <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="Padding" Value="2"/>
+    </Style>
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="3">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource HeloraTurquoise10}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource HeloraTurquoise20}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Onglets ===== -->
+    <Style TargetType="TabControl">
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="BorderBrush" Value="{StaticResource HeloraLine}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="0,10,0,0"/>
+    </Style>
+    <Style TargetType="TabItem">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Bd" Padding="18,8" Margin="0,0,4,0" BorderThickness="0,0,0,3"
+                            BorderBrush="Transparent" Background="Transparent" Cursor="Hand">
+                        <ContentPresenter x:Name="Cp" ContentSource="Header"
+                                          TextElement.Foreground="{StaticResource HeloraMuted}"
+                                          TextElement.FontWeight="SemiBold"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource HeloraTurquoise10}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource HeloraTurquoise}"/>
+                            <Setter TargetName="Cp" Property="TextElement.Foreground" Value="{StaticResource HeloraDark}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Tableau (aperçu d'import) ===== -->
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="6,7"/>
+        <Setter Property="BorderBrush" Value="#0E5A66"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+    <Style TargetType="DataGridCell">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="4,0"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource HeloraTurquoise20}"/>
+                <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ===== Bandeau de titre (sigle +| et titre) ===== -->
+    <Style x:Key="HeaderBand" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource HeloraDark}"/>
+        <Setter Property="Padding" Value="18,12"/>
+    </Style>
+
+    <DataTemplate x:Key="HeloraSigle">
+        <!-- Sigle Helora : la croix et la barre -->
+        <Canvas Width="30" Height="26">
+            <Rectangle Canvas.Left="6.5" Canvas.Top="3" Width="5" Height="20" RadiusX="1" RadiusY="1" Fill="White"/>
+            <Rectangle Canvas.Left="0" Canvas.Top="10.5" Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="White"/>
+            <Rectangle Canvas.Left="22" Canvas.Top="0" Width="5" Height="26" RadiusX="1" RadiusY="1" Fill="White"/>
+        </Canvas>
+    </DataTemplate>
+</ResourceDictionary>
