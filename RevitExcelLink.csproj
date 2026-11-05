@@ -14,7 +14,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>RevitExcelLink</RootNamespace>
     <AssemblyName>RevitExcelLink</AssemblyName>
-    <Version>1.8.0</Version>
+    <Version>1.9.0</Version>
 
     <!-- Copie les dépendances (ClosedXML…) dans le dossier de sortie -->
     <EnableDynamicLoading>true</EnableDynamicLoading>

@@ -91,8 +91,7 @@ namespace RevitExcelLink.Commands
                 foreach (FamilyInstance fi in RoomLocator.PointFamilies(doc, limit).ToList())
                 {
                     analysed++;
-                    XYZ pt = RoomLocator.PointOf(fi);
-                    Room room = pt != null ? locator.Find(pt) : null;
+                    Room room = locator.FindFor(fi);
                     if (room == null) { outside.Add(fi.Id); continue; }
 
                     string key = room.Document.PathName + "|" + room.UniqueId;

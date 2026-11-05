@@ -125,6 +125,7 @@ UI/Icons.cs                  Icônes dessinées en code
    - **HEL_BLOC** = `B`, **HEL_Etage** = `0`
    - **H_Num_GMAO** = `015`, qui s'incrémente à chaque clic
 3. Une **palette flottante** reste ouverte pendant la numérotation : prochain numéro en grand, **Sauter**, **Précédent**, **Aller au n°** (sauter plusieurs numéros), historique des derniers locaux, **Annuler le dernier** (remet le local et ses éléments dans leur état d'avant) et **Terminer**. Échap dans la vue termine aussi. La palette garde sa position d'une fois sur l'autre.
+   Pendant la session, les locaux de la vue active sont colorés : **rose pâle** = à numéroter, **vert pastel** = numéroté. L'affichage d'origine de la vue est restauré à la fin, y compris son gabarit.
 4. Si un numéro est déjà pris par une autre pièce, l'outil propose : utiliser le numéro libre suivant, attribuer quand même, ou annuler ce clic.
 5. Toute la session s'annule en une seule fois avec **Ctrl+Z**. La prochaine fois, la fenêtre repart du numéro suivant.
 6. Si la case **« Remplir aussi les éléments contenus dans chaque local »** est cochée, chaque clic remplit aussi les familles ponctuelles du local (équipements, appareils, mobilier, détecteurs…) : `H_Bloc`, `H_Etage`, `H_Num_GMAO` et `NUM_LOCAL_GMAO` (numéro complet du local).
@@ -135,4 +136,5 @@ Pour les modèles techniques dont les pièces sont dans la maquette architecture
 1. Choisissez les éléments à traiter (vue active, tout le modèle ou sélection) et où chercher les locaux (ce modèle et/ou chaque lien).
 2. Chaque famille ponctuelle reçoit les valeurs du local qui la contient (`HEL_BLOC` → `H_Bloc`, `HEL_Etage` → `H_Etage`, `H_Num_GMAO` → `H_Num_GMAO`, `Numéro` → `NUM_LOCAL_GMAO`).
 3. Le local est trouvé en plan, à la hauteur de son sol : un détecteur au plafond est donc bien rattaché à son local. Si des locaux se superposent, c'est celui de l'étage le plus proche sous l'élément qui compte.
-4. Le bilan permet de sélectionner les éléments hors de tout local. Les portes et fenêtres sont exclues.
+4. Les éléments posés sur un mur (prises, déclencheurs…) dont le point tombe sur la limite du local sont rattachés au local situé devant eux. Les familles linéaires (luminaires…) sont rattachées par le milieu de leur ligne.
+5. Le bilan permet de sélectionner les éléments hors de tout local. Les portes, fenêtres et poutres sont exclues.

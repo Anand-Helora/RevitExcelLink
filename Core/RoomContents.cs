@@ -127,10 +127,60 @@ namespace RevitExcelLink.Core
             return best?.Room;
         }
 
-        /// <summary>Point de référence d'un élément ponctuel, ou null.</summary>
-        public static XYZ PointOf(Element e) => (e.Location as LocationPoint)?.Point;
+        /// <summary>Point de référence d'un élément : point d'insertion, ou milieu de la ligne d'implantation.</summary>
+        public static XYZ PointOf(Element e)
+        {
+            if (e.Location is LocationPoint lp) return lp.Point;
+            if (e.Location is LocationCurve lc && lc.Curve != null)
+            {
+                try { return lc.Curve.Evaluate(0.5, true); } catch { }
+            }
+            return null;
+        }
 
-        /// <summary>Familles ponctuelles du modèle (équipements, appareils, mobilier…), hors portes et fenêtres.</summary>
+        private static readonly double[] SearchDistances = { 0.35, 0.8, 1.6 };   // pieds : ~10, 25 et 50 cm
+
+        /// <summary>
+        /// Local qui contient l'élément. Si son point tombe sur une limite (élément posé sur un mur),
+        /// on cherche juste devant lui (côté où il est orienté), puis tout autour.
+        /// </summary>
+        public Room FindFor(Element e)
+        {
+            XYZ p = PointOf(e);
+            if (p == null) return null;
+            Room room = Find(p);
+            if (room != null) return room;
+
+            var directions = new List<XYZ>();
+            if (e is FamilyInstance fi)
+            {
+                try
+                {
+                    XYZ f = fi.FacingOrientation;
+                    if (f != null)
+                    {
+                        var flat = new XYZ(f.X, f.Y, 0);
+                        if (!flat.IsZeroLength()) { directions.Add(flat.Normalize()); directions.Add(flat.Normalize().Negate()); }
+                    }
+                }
+                catch { }
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                double a = i * Math.PI / 4;
+                directions.Add(new XYZ(Math.Cos(a), Math.Sin(a), 0));
+            }
+
+            foreach (double d in SearchDistances)
+                foreach (XYZ dir in directions)
+                {
+                    room = Find(p + dir * d);
+                    if (room != null) return room;
+                }
+            return null;
+        }
+
+        /// <summary>Familles du modèle (équipements, appareils, mobilier, luminaires…), hors portes, fenêtres et poutres.</summary>
         public static IEnumerable<FamilyInstance> PointFamilies(Document doc, ICollection<ElementId> limitTo = null, Outline zone = null)
         {
             FilteredElementCollector col = limitTo != null && limitTo.Count > 0
@@ -142,9 +192,10 @@ namespace RevitExcelLink.Core
             foreach (FamilyInstance fi in col.Cast<FamilyInstance>())
             {
                 if (fi.ViewSpecific || fi.Category == null || fi.Category.CategoryType != CategoryType.Model) continue;
-                if (!(fi.Location is LocationPoint)) continue;
+                if (!(fi.Location is LocationPoint) && !(fi.Location is LocationCurve)) continue;
                 long cat = fi.Category.Id.Value;
-                if (cat == (long)BuiltInCategory.OST_Doors || cat == (long)BuiltInCategory.OST_Windows) continue;
+                if (cat == (long)BuiltInCategory.OST_Doors || cat == (long)BuiltInCategory.OST_Windows
+                    || cat == (long)BuiltInCategory.OST_StructuralFraming || cat == (long)BuiltInCategory.OST_Rooms) continue;
                 yield return fi;
             }
         }
@@ -154,8 +205,9 @@ namespace RevitExcelLink.Core
         {
             BoundingBoxXYZ bb = room.get_BoundingBox(null);
             if (bb == null) return null;
-            return new Outline(new XYZ(bb.Min.X, bb.Min.Y, bb.Min.Z - BelowTolerance),
-                               new XYZ(bb.Max.X, bb.Max.Y, bb.Max.Z + AboveMargin));
+            const double xy = 2.0;   // éléments posés sur les murs du local
+            return new Outline(new XYZ(bb.Min.X - xy, bb.Min.Y - xy, bb.Min.Z - BelowTolerance),
+                               new XYZ(bb.Max.X + xy, bb.Max.Y + xy, bb.Max.Z + AboveMargin));
         }
     }
 

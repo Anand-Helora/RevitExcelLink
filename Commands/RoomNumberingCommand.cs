@@ -76,6 +76,8 @@ namespace RevitExcelLink.Commands
             using (var group = new TransactionGroup(doc, "Numérotation des locaux"))
             {
                 group.Start();
+                RoomHighlighter highlighter = RoomHighlighter.Start(doc, doc.ActiveView);
+                uidoc.RefreshActiveView();
                 try
                 {
                     while (!session.FinishRequested)
@@ -96,7 +98,8 @@ namespace RevitExcelLink.Commands
                             {
                                 session.UndoRequested = false;
                                 session.RepickRequested = false;
-                                UndoLast(doc, session, index);
+                                UndoLast(doc, session, index, highlighter);
+                                uidoc.RefreshActiveView();
                                 continue;
                             }
                             if (session.RepickRequested) { session.RepickRequested = false; continue; }
@@ -122,9 +125,11 @@ namespace RevitExcelLink.Commands
                             }
                         }
 
-                        NumberRoom(doc, session, room, next, locator, index, errors);
+                        NumberRoom(doc, session, room, next, locator, index, errors, highlighter);
+                        uidoc.RefreshActiveView();
                     }
 
+                    highlighter?.Restore();   // la vue retrouve son affichage d'origine
                     if (session.NumberedCount > 0) group.Assimilate();
                     else group.RollBack();
                 }
@@ -152,7 +157,8 @@ namespace RevitExcelLink.Commands
         // ------------------------------------------------------------------ numérotation d'un local
 
         private static void NumberRoom(Document doc, NumberingSession session, Room room, string number,
-                                       RoomLocator locator, RoomNumberIndex index, List<string> errors)
+                                       RoomLocator locator, RoomNumberIndex index, List<string> errors,
+                                       RoomHighlighter highlighter)
         {
             NumberingSettings s = session.Settings;
             string counter = session.CounterOf(session.Current);
@@ -173,9 +179,7 @@ namespace RevitExcelLink.Commands
                 if (zone != null)
                     foreach (FamilyInstance fi in RoomLocator.PointFamilies(doc, null, zone))
                     {
-                        XYZ pt = RoomLocator.PointOf(fi);
-                        if (pt == null) continue;
-                        Room found = locator.Find(pt);
+                        Room found = locator.FindFor(fi);
                         if (found != null && found.Id.Value == room.Id.Value) contents.Add(fi);
                     }
             }
@@ -200,6 +204,8 @@ namespace RevitExcelLink.Commands
                 AddProblem(problems, room, s.ParamEtage, s.Etage);
                 AddProblem(problems, room, s.ParamGmao, counter);
 
+                highlighter?.MarkDone(room);
+
                 var values = new RoomValues { Bloc = s.Bloc, Etage = s.Etage, Gmao = counter, Number = number };
                 foreach (FamilyInstance fi in contents)
                     if (ElementValueWriter.Fill(fi, values, s, s.OverwriteContents, problems) > 0) entry.ElementCount++;
@@ -218,7 +224,7 @@ namespace RevitExcelLink.Commands
             }
         }
 
-        private static void UndoLast(Document doc, NumberingSession session, RoomNumberIndex index)
+        private static void UndoLast(Document doc, NumberingSession session, RoomNumberIndex index, RoomHighlighter highlighter)
         {
             HistoryEntry last = session.History.FirstOrDefault(h => !h.IsSkip);
             if (last == null) return;
@@ -228,6 +234,7 @@ namespace RevitExcelLink.Commands
                 SilenceWarnings(t);
                 t.Start();
                 foreach (ParamSnapshot snap in last.Undo) snap.Restore(doc);
+                highlighter?.MarkPending(doc.GetElement(last.RoomId) as Room);
                 if (t.Commit() != TransactionStatus.Committed) return;
             }
 
