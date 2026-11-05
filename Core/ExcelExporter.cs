@@ -127,7 +127,7 @@ namespace RevitExcelLink.Core
                             snap.Cell(r, c).Value = ValueCodec.Normalize(v);
 
                             if (p.IsReadOnly) cell.Style.Fill.BackgroundColor = CellReadOnly;
-                            else if (col.Owner == ParamOwner.Type && !req.ByType) cell.Style.Fill.BackgroundColor = CellType;
+                            else if (col.Owner == ParamOwner.Type && !req.ByType) cell.Style.Fill.BackgroundColor = CellTypeParam;
                         }
                         r++;
                     }

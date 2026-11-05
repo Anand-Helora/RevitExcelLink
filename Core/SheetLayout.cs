@@ -34,7 +34,7 @@ namespace RevitExcelLink.Core
         public static readonly XLColor HeaderReadOnly = XLColor.FromHtml("#FFC7CE");
         public static readonly XLColor HeaderFixed = XLColor.FromHtml("#D9D9D9");
 
-        public static readonly XLColor CellType = XLColor.FromHtml("#FFF7D6");
+        public static readonly XLColor CellTypeParam = XLColor.FromHtml("#FFF7D6");
         public static readonly XLColor CellReadOnly = XLColor.FromHtml("#FDE2E4");
         public static readonly XLColor CellAbsent = XLColor.FromHtml("#BFBFBF");
         public static readonly XLColor CellFixed = XLColor.FromHtml("#F2F2F2");
