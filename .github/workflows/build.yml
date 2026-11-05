@@ -2,7 +2,11 @@ name: Compiler l'add-in
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -31,3 +35,15 @@ jobs:
         with:
           name: RevitExcelLink-Addins-2025
           path: package/2025
+
+      - name: Publier le paquet dans la branche dist
+        shell: pwsh
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          Compress-Archive -Path package\2025\* -DestinationPath RevitExcelLink-a-copier.zip -Force
+          git checkout --orphan dist
+          git rm -rf --cached . | Out-Null
+          git add -f RevitExcelLink-a-copier.zip
+          git commit -m "Paquet compilé ($env:GITHUB_SHA)"
+          git push -f origin dist
