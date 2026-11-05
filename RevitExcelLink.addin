@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Excel Link</Name>
+    <!-- Chemin relatif à ce fichier .addin -->
+    <Assembly>RevitExcelLink\RevitExcelLink.dll</Assembly>
+    <FullClassName>RevitExcelLink.App</FullClassName>
+    <AddInId>6F3C2B7A-9E41-4C8D-A2F5-1B7D3E9C4A60</AddInId>
+    <VendorId>PERSO</VendorId>
+    <VendorDescription>Add-in personnel – export / import Excel</VendorDescription>
+  </AddIn>
+</RevitAddIns>

@@ -1,0 +1,33 @@
+name: Compiler l'add-in
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Compiler
+        run: dotnet build RevitExcelLink.csproj -c Release -p:SkipDeploy=true
+
+      - name: Préparer le dossier à copier dans Addins\2025
+        shell: pwsh
+        run: |
+          $out = "package\2025"
+          New-Item -ItemType Directory -Force "$out\RevitExcelLink" | Out-Null
+          Copy-Item RevitExcelLink.addin $out
+          Copy-Item bin\Release\*.dll "$out\RevitExcelLink"
+          Copy-Item bin\Release\*.deps.json "$out\RevitExcelLink"
+          Get-ChildItem -Recurse $out | Select-Object FullName
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RevitExcelLink-Addins-2025
+          path: package/2025
