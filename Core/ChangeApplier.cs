@@ -110,7 +110,7 @@ namespace RevitExcelLink.Core
                     i.ParamName, Clean(i.OldValue), Clean(i.NewValue), Clean(i.Message)));
             }
 
-            string name = Path.GetFileNameWithoutExtension(excelPath) + "_import_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt";
+            string name = Path.GetFileNameWithoutExtension(excelPath) + " – rapport d'import " + DateTime.Now.ToString("yyyy-MM-dd HH'h'mm") + ".txt";
             string target = Path.Combine(Path.GetDirectoryName(excelPath) ?? Path.GetTempPath(), name);
             try { File.WriteAllText(target, sb.ToString(), Encoding.UTF8); }
             catch

@@ -460,11 +460,13 @@ namespace RevitExcelLink.UI
                 if (Selected.Count == 0) { Warn("Ajoutez au moins un paramètre dans la liste de droite."); return; }
             }
 
-            string safeTitle = string.Concat(_doc.Title.Split(Path.GetInvalidFileNameChars()));
+            List<string> contentNames = schedules
+                ? Schedules.Where(x => x.IsChecked).Select(x => x.Info.Name).ToList()
+                : cats.Select(c => c.Name).ToList();
             var dlg = new SaveFileDialog
             {
                 Filter = "Classeur Excel (*.xlsx)|*.xlsx",
-                FileName = $"{safeTitle}_{(schedules ? "nomenclatures" : "export")}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                FileName = FileNames.Suggest(_doc, contentNames, schedules ? "nomenclatures" : "catégories"),
                 InitialDirectory = UserSettings.LastFolder
             };
             if (dlg.ShowDialog(this) != true) return;
