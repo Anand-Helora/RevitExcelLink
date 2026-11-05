@@ -125,7 +125,7 @@ UI/Icons.cs                  Icônes dessinées en code
    - **HEL_BLOC** = `B`, **HEL_Etage** = `0`
    - **H_Num_GMAO** = `015`, qui s'incrémente à chaque clic
 3. Une **palette flottante** reste ouverte pendant la numérotation : prochain numéro en grand, **Sauter**, **Précédent**, **Aller au n°** (sauter plusieurs numéros), historique des derniers locaux, **Annuler le dernier** (remet le local et ses éléments dans leur état d'avant) et **Terminer**. Échap dans la vue termine aussi. La palette garde sa position d'une fois sur l'autre.
-   Pendant la session, les locaux de la vue active sont colorés : **rose pâle** = à numéroter, **vert pastel** = numéroté. L'affichage d'origine de la vue est restauré à la fin, y compris son gabarit.
+   Pendant la session, les locaux de la vue active sont colorés : **rose pâle** = à numéroter, **vert pastel** = numéroté. Cette coloration est un affichage temporaire : rien n'est modifié dans le modèle ni dans la vue.
 4. Si un numéro est déjà pris par une autre pièce, l'outil propose : utiliser le numéro libre suivant, attribuer quand même, ou annuler ce clic.
 5. Toute la session s'annule en une seule fois avec **Ctrl+Z**. La prochaine fois, la fenêtre repart du numéro suivant.
 6. Si la case **« Remplir aussi les éléments contenus dans chaque local »** est cochée, chaque clic remplit aussi les familles ponctuelles du local (équipements, appareils, mobilier, détecteurs…) : `H_Bloc`, `H_Etage`, `H_Num_GMAO` et `NUM_LOCAL_GMAO` (numéro complet du local).

@@ -71,8 +71,8 @@ namespace RevitExcelLink
                 var about = new PushButtonData("RXL_About", "À propos", assembly, typeof(AboutCommand).FullName)
                 {
                     ToolTip = "Helora BIM – Excel Link : version et page de présentation.",
-                    LargeImage = Icons.Make(32, "+", Icons.HeloraDark),
-                    Image = Icons.Make(16, "+", Icons.HeloraDark)
+                    LargeImage = Icons.MakeSigle(32, Icons.HeloraDark),
+                    Image = Icons.MakeSigle(16, Icons.HeloraDark)
                 };
                 info.AddItem(about);
 

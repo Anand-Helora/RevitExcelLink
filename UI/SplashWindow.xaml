@@ -32,15 +32,13 @@
                 </Grid.Clip>
 
                 <!-- Grand sigle +| en arrière-plan (élément graphique de la charte) -->
-                <Canvas x:Name="BigSigle" Opacity="0" HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Width="300" Height="300" Margin="0,0,-70,0">
-                    <Canvas.RenderTransform>
+                <Viewbox x:Name="BigSigle" Opacity="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                         Width="360" Height="298" Margin="0,0,-80,0" Stretch="Uniform">
+                    <Viewbox.RenderTransform>
                         <TranslateTransform x:Name="SigleShift" X="60"/>
-                    </Canvas.RenderTransform>
-                    <Rectangle Canvas.Left="62" Canvas.Top="40" Width="42" Height="220" RadiusX="21" RadiusY="21" Fill="{StaticResource Turquoise}"/>
-                    <Rectangle Canvas.Left="0" Canvas.Top="129" Width="166" Height="42" RadiusX="21" RadiusY="21" Fill="{StaticResource Turquoise}"/>
-                    <Rectangle Canvas.Left="214" Canvas.Top="0" Width="42" Height="300" RadiusX="21" RadiusY="21" Fill="{StaticResource Turquoise}"/>
-                </Canvas>
+                    </Viewbox.RenderTransform>
+                    <Path Fill="{StaticResource Turquoise}" Data="M99.6,86.5L99.6,86.5c2.8,0,5.1-2.3,5.1-5.1V5.1c0-2.8-2.3-5.1-5.1-5.1h0c-2.8,0-5.1,2.3-5.1,5.1v76.2C94.5,84.2,96.8,86.5,99.6,86.5z M81.4,38.2h-33v-33c0-2.8-2.3-5.1-5.1-5.1c-2.8,0-5.1,2.3-5.1,5.1v33h-33c-2.8,0-5.1,2.3-5.1,5.1c0,2.8,2.3,5.1,5.1,5.1h33v33c0,2.8,2.3,5.1,5.1,5.1c2.8,0,5.1-2.3,5.1-5.1v-33h33c2.8,0,5.1-2.3,5.1-5.1S84.3,38.2,81.4,38.2z"/>
+                </Viewbox>
 
                 <!-- Petites croix décoratives -->
                 <Canvas IsHitTestVisible="False">

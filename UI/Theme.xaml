@@ -188,12 +188,12 @@
         <Setter Property="Padding" Value="18,12"/>
     </Style>
 
+    <!-- Sigle Helora officiel (HELORA_logo_sigle_vert.svg, viewBox 104.7 x 86.6) -->
+    <Geometry x:Key="HeloraSigleGeometry">M99.6,86.5L99.6,86.5c2.8,0,5.1-2.3,5.1-5.1V5.1c0-2.8-2.3-5.1-5.1-5.1h0c-2.8,0-5.1,2.3-5.1,5.1v76.2C94.5,84.2,96.8,86.5,99.6,86.5z M81.4,38.2h-33v-33c0-2.8-2.3-5.1-5.1-5.1c-2.8,0-5.1,2.3-5.1,5.1v33h-33c-2.8,0-5.1,2.3-5.1,5.1c0,2.8,2.3,5.1,5.1,5.1h33v33c0,2.8,2.3,5.1,5.1,5.1c2.8,0,5.1-2.3,5.1-5.1v-33h33c2.8,0,5.1-2.3,5.1-5.1S84.3,38.2,81.4,38.2z</Geometry>
+
     <DataTemplate x:Key="HeloraSigle">
-        <!-- Sigle Helora : la croix et la barre -->
-        <Canvas Width="30" Height="26">
-            <Rectangle Canvas.Left="6.5" Canvas.Top="3" Width="5" Height="20" RadiusX="1" RadiusY="1" Fill="White"/>
-            <Rectangle Canvas.Left="0" Canvas.Top="10.5" Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="White"/>
-            <Rectangle Canvas.Left="22" Canvas.Top="0" Width="5" Height="26" RadiusX="1" RadiusY="1" Fill="White"/>
-        </Canvas>
+        <Viewbox Width="31" Height="26" Stretch="Uniform">
+            <Path Data="{StaticResource HeloraSigleGeometry}" Fill="White"/>
+        </Viewbox>
     </DataTemplate>
 </ResourceDictionary>

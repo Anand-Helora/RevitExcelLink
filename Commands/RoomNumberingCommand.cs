@@ -76,8 +76,7 @@ namespace RevitExcelLink.Commands
             using (var group = new TransactionGroup(doc, "Numérotation des locaux"))
             {
                 group.Start();
-                RoomHighlighter highlighter = RoomHighlighter.Start(doc, doc.ActiveView);
-                uidoc.RefreshActiveView();
+                RoomPainter painter = RoomPainter.Start(new UIDocumentProxy(doc, uidoc.RefreshActiveView));
                 try
                 {
                     while (!session.FinishRequested)
@@ -98,7 +97,7 @@ namespace RevitExcelLink.Commands
                             {
                                 session.UndoRequested = false;
                                 session.RepickRequested = false;
-                                UndoLast(doc, session, index, highlighter);
+                                UndoLast(doc, session, index, painter);
                                 uidoc.RefreshActiveView();
                                 continue;
                             }
@@ -125,11 +124,10 @@ namespace RevitExcelLink.Commands
                             }
                         }
 
-                        NumberRoom(doc, session, room, next, locator, index, errors, highlighter);
+                        NumberRoom(doc, session, room, next, locator, index, errors, painter);
                         uidoc.RefreshActiveView();
                     }
 
-                    highlighter?.Restore();   // la vue retrouve son affichage d'origine
                     if (session.NumberedCount > 0) group.Assimilate();
                     else group.RollBack();
                 }
@@ -140,6 +138,8 @@ namespace RevitExcelLink.Commands
                 }
                 finally
                 {
+                    painter?.Dispose();          // fin de la coloration temporaire
+                    uidoc.RefreshActiveView();
                     settings.PaletteLeft = palette.Left;
                     settings.PaletteTop = palette.Top;
                     palette.CloseFromCommand();
@@ -150,7 +150,7 @@ namespace RevitExcelLink.Commands
             settings.Start = session.Current;
             settings.Save();
 
-            ShowSummary(session, errors);
+            if (errors.Count > 0) ShowSummary(session, errors);   // message seulement en cas de problème
             return session.NumberedCount > 0 ? Result.Succeeded : Result.Cancelled;
         }
 
@@ -158,7 +158,7 @@ namespace RevitExcelLink.Commands
 
         private static void NumberRoom(Document doc, NumberingSession session, Room room, string number,
                                        RoomLocator locator, RoomNumberIndex index, List<string> errors,
-                                       RoomHighlighter highlighter)
+                                       RoomPainter painter)
         {
             NumberingSettings s = session.Settings;
             string counter = session.CounterOf(session.Current);
@@ -204,8 +204,6 @@ namespace RevitExcelLink.Commands
                 AddProblem(problems, room, s.ParamEtage, s.Etage);
                 AddProblem(problems, room, s.ParamGmao, counter);
 
-                highlighter?.MarkDone(room);
-
                 var values = new RoomValues { Bloc = s.Bloc, Etage = s.Etage, Gmao = counter, Number = number };
                 foreach (FamilyInstance fi in contents)
                     if (ElementValueWriter.Fill(fi, values, s, s.OverwriteContents, problems) > 0) entry.ElementCount++;
@@ -213,6 +211,7 @@ namespace RevitExcelLink.Commands
                 if (t.Commit() == TransactionStatus.Committed)
                 {
                     index.Move(room.Id, entry.PreviousRoomNumber, number);
+                    painter?.MarkDone(room);
                     session.History.Insert(0, entry);
                     session.Current++;
                     if (problems.Count > 0) errors.Add($"{number} : {string.Join(" ; ", problems.Distinct())}");
@@ -224,7 +223,7 @@ namespace RevitExcelLink.Commands
             }
         }
 
-        private static void UndoLast(Document doc, NumberingSession session, RoomNumberIndex index, RoomHighlighter highlighter)
+        private static void UndoLast(Document doc, NumberingSession session, RoomNumberIndex index, RoomPainter painter)
         {
             HistoryEntry last = session.History.FirstOrDefault(h => !h.IsSkip);
             if (last == null) return;
@@ -234,11 +233,11 @@ namespace RevitExcelLink.Commands
                 SilenceWarnings(t);
                 t.Start();
                 foreach (ParamSnapshot snap in last.Undo) snap.Restore(doc);
-                highlighter?.MarkPending(doc.GetElement(last.RoomId) as Room);
                 if (t.Commit() != TransactionStatus.Committed) return;
             }
 
             index.Move(last.RoomId, last.Number, last.PreviousRoomNumber);
+            painter?.MarkPending(doc.GetElement(last.RoomId) as Room);
             int pos = session.History.IndexOf(last);
             session.History.RemoveRange(0, pos + 1);   // retire aussi les sauts faits après ce local
             session.Current = last.Counter;
