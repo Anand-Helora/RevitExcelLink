@@ -9,10 +9,10 @@ using System.Windows.Threading;
 
 namespace RevitExcelLink.UI
 {
-    /// <summary>Page de garde affichée environ 3 secondes au démarrage de Revit (un clic la ferme).</summary>
+    /// <summary>Page de garde affichée environ 5 secondes au démarrage de Revit (un clic la ferme).</summary>
     public partial class SplashWindow : Window
     {
-        private const double TotalSeconds = 3.0;
+        private const double TotalSeconds = 5.0;
         private const double FadeOutSeconds = 0.4;
         private bool _closing;
 
@@ -54,8 +54,9 @@ namespace RevitExcelLink.UI
             Animate(Progress, WidthProperty, 0, barWidth, 0.1, TotalSeconds - FadeOutSeconds - 0.2,
                     new SineEase { EasingMode = EasingMode.EaseInOut });
 
-            After(1.3, () => TxtStatus.Text = "Préparation du ruban Helora BIM…");
-            After(2.3, () => TxtStatus.Text = "Prêt");
+            After(1.8, () => TxtStatus.Text = "Préparation du ruban Helora BIM…");
+            After(3.0, () => TxtStatus.Text = "Chargement des modules Excel Link et Locaux…");
+            After(4.1, () => TxtStatus.Text = "Prêt");
             After(TotalSeconds - FadeOutSeconds, FadeOutAndClose);
         }
 

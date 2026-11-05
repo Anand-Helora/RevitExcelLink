@@ -42,7 +42,21 @@ namespace RevitExcelLink
 
                 panel.AddItem(export);
                 panel.AddItem(import);
-                panel.AddSeparator();
+
+                // --- Groupe « Locaux »
+                RibbonPanel rooms = application.CreateRibbonPanel(TabName, "Locaux");
+                var numbering = new PushButtonData("HBIM_RoomNumbering", "Numéroter\nles locaux", assembly, typeof(RoomNumberingCommand).FullName)
+                {
+                    ToolTip = "Numérote les locaux un par un : BLOC/ÉTAGE/NUMÉRO (ex. B/N00/015).",
+                    LongDescription = "Indiquez le bloc, l'étage et le numéro de départ, puis cliquez sur les locaux un par un. "
+                                      + "Remplit le Numéro, HEL_BLOC, HEL_Etage et H_Num_GMAO. Échap permet de sauter des numéros ou de terminer.",
+                    LargeImage = Icons.Make(32, "#", Icons.HeloraTurquoise),
+                    Image = Icons.Make(16, "#", Icons.HeloraTurquoise)
+                };
+                rooms.AddItem(numbering);
+
+                // --- Groupe « Helora BIM »
+                RibbonPanel info = application.CreateRibbonPanel(TabName, "Helora BIM");
 
                 var about = new PushButtonData("RXL_About", "À propos", assembly, typeof(AboutCommand).FullName)
                 {
@@ -50,7 +64,7 @@ namespace RevitExcelLink
                     LargeImage = Icons.Make(32, "+", Icons.HeloraDark),
                     Image = Icons.Make(16, "+", Icons.HeloraDark)
                 };
-                panel.AddItem(about);
+                info.AddItem(about);
 
                 // Page de garde une fois Revit complètement chargé (animation fluide)
                 application.ControlledApplication.ApplicationInitialized += (s, e) =>

@@ -1,0 +1,133 @@
+<Window x:Class="RevitExcelLink.UI.RoomNumberingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Helora BIM – Numérotation des locaux" Width="470" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/RevitExcelLink;component/UI/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="FieldLabel" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource HeloraDark}"/>
+            </Style>
+            <Style x:Key="BigBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="Padding" Value="8,5"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.Style>
+        <StaticResource ResourceKey="HeloraWindow"/>
+    </Window.Style>
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Style="{StaticResource HeaderBand}">
+            <DockPanel>
+                <ContentControl ContentTemplate="{StaticResource HeloraSigle}" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                <StackPanel>
+                    <TextBlock Foreground="White" FontFamily="{StaticResource HeloraTitleFont}" FontSize="20"><Run Text="Helora"/><Run Text=" BIM" Foreground="{StaticResource HeloraTurquoise50}"/></TextBlock>
+                    <TextBlock Text="NUMÉROTATION DES LOCAUX" Foreground="{StaticResource HeloraTurquoise50}" FontSize="10" FontWeight="SemiBold"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource HeloraLine}" BorderThickness="0,1,0,0" Padding="18,10">
+            <DockPanel LastChildFill="False">
+                <Button DockPanel.Dock="Right" Content="Annuler" IsCancel="True" Margin="8,0,0,0"/>
+                <Button DockPanel.Dock="Right" Content="COMMENCER" IsDefault="True" Style="{StaticResource PrimaryButton}" Click="Start_Click"/>
+            </DockPanel>
+        </Border>
+
+        <StackPanel Margin="18,14,18,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Bloc" Style="{StaticResource FieldLabel}"/>
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtBloc" Style="{StaticResource BigBox}" Margin="0,4" TextChanged="Field_Changed"/>
+
+                <TextBlock Grid.Row="1" Text="Étage" Style="{StaticResource FieldLabel}"/>
+                <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,4">
+                    <TextBlock DockPanel.Dock="Right" Text="ex. 0, 1, 2 … ou -1, -2" Foreground="{StaticResource HeloraMuted}"
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <TextBox x:Name="TxtEtage" Style="{StaticResource BigBox}" TextChanged="Etage_Changed"/>
+                </DockPanel>
+
+                <TextBlock Grid.Row="2" Text="Code étage" Style="{StaticResource FieldLabel}"/>
+                <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,4">
+                    <TextBlock DockPanel.Dock="Right" Text="calculé, modifiable" Foreground="{StaticResource HeloraMuted}"
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <TextBox x:Name="TxtFloorCode" Style="{StaticResource BigBox}" TextChanged="FloorCode_Changed"/>
+                </DockPanel>
+
+                <TextBlock Grid.Row="3" Text="N° de départ" Style="{StaticResource FieldLabel}"/>
+                <DockPanel Grid.Row="3" Grid.Column="1" Margin="0,4">
+                    <ComboBox x:Name="CbDigits" DockPanel.Dock="Right" Width="110" Margin="10,0,0,0" VerticalContentAlignment="Center"
+                              SelectionChanged="Field_Changed">
+                        <ComboBoxItem Content="2 chiffres" Tag="2"/>
+                        <ComboBoxItem Content="3 chiffres" Tag="3"/>
+                        <ComboBoxItem Content="4 chiffres" Tag="4"/>
+                    </ComboBox>
+                    <TextBox x:Name="TxtStart" Style="{StaticResource BigBox}" TextChanged="Field_Changed"/>
+                </DockPanel>
+
+                <DockPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,4" x:Name="LastUsedPanel" Visibility="Collapsed">
+                    <Button DockPanel.Dock="Right" x:Name="BtnContinue" Style="{StaticResource GhostButton}" Click="Continue_Click"/>
+                    <TextBlock x:Name="TxtLastUsed" Foreground="{StaticResource HeloraMuted}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                </DockPanel>
+            </Grid>
+
+            <!-- Aperçu -->
+            <Border Background="{StaticResource HeloraTurquoise10}" CornerRadius="8" Padding="14,10" Margin="0,10,0,0">
+                <StackPanel>
+                    <TextBlock Text="PREMIER LOCAL" Style="{StaticResource SectionTitle}" Margin="0,0,0,2"/>
+                    <TextBlock x:Name="TxtPreview" FontSize="26" Foreground="{StaticResource HeloraDark}"
+                               FontFamily="{StaticResource HeloraTitleFont}"/>
+                    <TextBlock x:Name="TxtPreviewDetail" Foreground="{StaticResource HeloraMuted}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock x:Name="TxtError" Foreground="{StaticResource HeloraOrange}" TextWrapping="Wrap" Margin="0,8,0,0" Visibility="Collapsed"/>
+
+            <!-- Mode d'emploi -->
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource HeloraMuted}" Margin="0,12,0,0">
+                <Run Text="Cliquez ensuite sur les locaux un par un, sur la pièce ou sur son étiquette."/>
+                <LineBreak/>
+                <Run Text="Échap" FontWeight="SemiBold" Foreground="{StaticResource HeloraDark}"/><Run Text=" : sauter un ou plusieurs numéros, ou terminer."/>
+            </TextBlock>
+
+            <Expander Header="Noms des paramètres" Margin="0,10,0,0" Foreground="{StaticResource HeloraMuted}">
+                <Grid Margin="0,6,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Bloc" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtParamBloc" Margin="0,2"/>
+                    <TextBlock Grid.Row="1" Text="Étage" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtParamEtage" Margin="0,2"/>
+                    <TextBlock Grid.Row="2" Text="N° GMAO" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtParamGmao" Margin="0,2"/>
+                </Grid>
+            </Expander>
+        </StackPanel>
+    </DockPanel>
+</Window>

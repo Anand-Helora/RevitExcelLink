@@ -69,7 +69,7 @@
                                    FontFamily="Gotham Rounded Light, Gotham Rounded, Segoe UI Light">
                             <Run Text="Helora"/><Run Text=" BIM" Foreground="{StaticResource Turquoise50}"/>
                         </TextBlock>
-                        <TextBlock Text="EXCEL LINK  ·  REVIT ⇄ EXCEL" Foreground="{StaticResource Turquoise50}"
+                        <TextBlock Text="EXCEL LINK  ·  NUMÉROTATION DES LOCAUX" Foreground="{StaticResource Turquoise50}"
                                    FontSize="11" FontWeight="SemiBold" Margin="2,6,0,0"/>
                     </StackPanel>
                 </StackPanel>

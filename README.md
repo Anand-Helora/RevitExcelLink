@@ -113,3 +113,17 @@ UI/Icons.cs                  Icônes dessinées en code
 4. Testez un conflit : exportez, modifiez une valeur dans Revit et la même dans Excel, puis importez. Le conflit doit apparaître décoché.
 5. Testez un paramètre de type (Largeur d'une porte) en mode « une ligne par élément », puis en mode « une ligne par type ».
 6. Testez une saisie invalide (texte dans une colonne de longueur) : elle doit apparaître en erreur.
+
+## 7. Numérotation des locaux (onglet Helora BIM → groupe Locaux)
+
+1. Cliquez sur **Numéroter les locaux** et indiquez le **Bloc**, l'**Étage** et le **N° de départ**.
+   - Le code étage se calcule tout seul : `N00`, `N01`… pour les étages 0 et plus, `S01`, `S02`… pour les sous-sols. Il reste modifiable.
+   - Si des locaux existent déjà sur ce bloc et cet étage, la fenêtre propose de continuer après le dernier numéro utilisé.
+   - L'aperçu montre le premier numéro, par exemple `B/N00/015`.
+2. Cliquez sur les locaux **un par un**, sur la pièce ou sur son étiquette. Chaque clic remplit :
+   - **Numéro** (Revit) = `B/N00/015`
+   - **HEL_BLOC** = `B`, **HEL_Etage** = `0`
+   - **H_Num_GMAO** = `015`, qui s'incrémente à chaque clic
+3. **Échap** ouvre un menu : *Reprendre*, *Sauter 1 numéro*, *Aller au numéro…* (pour sauter plusieurs numéros ou revenir en arrière) ou *Terminer*. Un deuxième Échap termine.
+4. Si un numéro est déjà pris par une autre pièce, l'outil propose : utiliser le numéro libre suivant, attribuer quand même, ou annuler ce clic.
+5. Toute la session s'annule en une seule fois avec **Ctrl+Z**. La prochaine fois, la fenêtre repart du numéro suivant.
