@@ -39,6 +39,7 @@ Les références à l'API Revit viennent des paquets NuGet `Nice3point.Revit.Api
 ### Export des nomenclatures (onglet « Nomenclatures »)
 - Toutes les nomenclatures du projet sont listées : quantitatifs, métrés de matériaux, listes de feuilles et de vues, nomenclatures de clés. Si une nomenclature est ouverte dans Revit, elle est cochée automatiquement.
 - **Modifiable** : une ligne par élément affiché (avec les filtres de la nomenclature), les colonnes et leurs en-têtes repris de la nomenclature, dans le même ordre de tri. Le fichier se **réimporte** comme un export de catégories.
+  Les champs d'éléments liés (Pièce de départ, Pièce d'arrivée, Pièce, Espace, Informations sur le projet) sont exportés et modifiables : la modification s'applique à la pièce, à l'espace ou au projet, une seule fois même s'ils apparaissent sur plusieurs lignes.
   Les colonnes calculées (formules, totaux, nombre, pourcentages) ne sont pas modifiables : elles ne sont pas exportées dans ce mode.
 - **Mise en forme** : copie fidèle de l'affichage Revit (titre, en-têtes, regroupements, totaux, cellules fusionnées, largeurs de colonnes). Ce fichier n'est **pas réimportable**.
 - Un aperçu des colonnes exportées s'affiche quand on clique sur une nomenclature.

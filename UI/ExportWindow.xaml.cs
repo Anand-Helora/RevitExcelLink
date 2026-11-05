@@ -47,13 +47,20 @@ namespace RevitExcelLink.UI
         private static readonly Brush InstanceBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x00, 0x9E, 0x99)));
         private static readonly Brush TypeBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x80, 0xCF, 0xCC)));
         private static readonly Brush ReadOnlyBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xE1, 0x60, 0x21)));
+        private static readonly Brush RelatedBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x04, 0x45, 0x50)));
 
         public ParamDescriptor Desc { get; }
         public ParamItem(ParamDescriptor d) { Desc = d; }
 
         public string Display => Desc.Name + (Desc.Owner == ParamOwner.Type ? "  (type)" : "");
-        public Brush Brush => Desc.IsReadOnly ? ReadOnlyBrush : Desc.Owner == ParamOwner.Type ? TypeBrush : InstanceBrush;
-        public string Tooltip => $"{Desc.Origin}\n{(Desc.Owner == ParamOwner.Type ? "Paramètre de type" : "Paramètre d'occurrence")}"
+
+        public Brush Brush => Desc.IsReadOnly ? ReadOnlyBrush
+                            : Desc.Owner == ParamOwner.Type ? TypeBrush
+                            : Owners.IsRelated(Desc.Owner) ? RelatedBrush
+                            : InstanceBrush;
+
+        public string Tooltip => $"{Desc.Origin}\n{Owners.Label(Desc.Owner)}"
+                                 + (Owners.IsShared(Desc.Owner) ? $"\nUne modification s'applique à {Owners.SharedNote(Desc.Owner)}." : "")
                                  + (Desc.IsReadOnly ? "\nLecture seule" : "");
 
         private static Brush Freeze(Brush b) { b.Freeze(); return b; }
@@ -97,6 +104,8 @@ namespace RevitExcelLink.UI
         public ObservableCollection<ScheduleItem> Schedules { get; } = new ObservableCollection<ScheduleItem>();
         public ObservableCollection<ParamItem> ScheduleColumns { get; } = new ObservableCollection<ParamItem>();
         private ICollectionView _schedView;
+        private bool _bulkSchedules;
+        private readonly Dictionary<long, ScheduleContent> _scheduleCache = new Dictionary<long, ScheduleContent>();
 
         /// <summary>Demande d'export, renseignée quand l'utilisateur valide.</summary>
         public ExportRequest Result { get; private set; }
@@ -280,7 +289,7 @@ namespace RevitExcelLink.UI
             foreach (ScheduleInfo info in ScheduleScanner.List(_doc))
             {
                 var item = new ScheduleItem(info) { IsChecked = activeId != null && info.Id == activeId };
-                item.Changed = UpdateStatus;
+                item.Changed = () => OnScheduleChecked(item);
                 Schedules.Add(item);
             }
 
@@ -302,22 +311,64 @@ namespace RevitExcelLink.UI
         }
 
         private void SchedSearch_Changed(object sender, TextChangedEventArgs e) => _schedView?.Refresh();
-        private void CheckAllSched_Click(object sender, RoutedEventArgs e) { foreach (ScheduleItem s in _schedView.Cast<ScheduleItem>()) s.IsChecked = true; }
-        private void UncheckAllSched_Click(object sender, RoutedEventArgs e) { foreach (ScheduleItem s in _schedView.Cast<ScheduleItem>()) s.IsChecked = false; }
+        private void CheckAllSched_Click(object sender, RoutedEventArgs e) => SetVisibleSchedules(true);
+        private void UncheckAllSched_Click(object sender, RoutedEventArgs e) => SetVisibleSchedules(false);
+
+        private void SetVisibleSchedules(bool value)
+        {
+            _bulkSchedules = true;
+            foreach (ScheduleItem s in _schedView.Cast<ScheduleItem>()) s.IsChecked = value;
+            _bulkSchedules = false;
+            UpdateStatus();
+        }
+
+        /// <summary>Cocher une case suffit à afficher l'aperçu de cette nomenclature.</summary>
+        private void OnScheduleChecked(ScheduleItem item)
+        {
+            UpdateStatus();
+            if (_bulkSchedules || LstSchedules == null) return;
+            if (ReferenceEquals(LstSchedules.SelectedItem, item)) ShowSchedulePreview(item);
+            else LstSchedules.SelectedItem = item;   // déclenche Schedule_SelectionChanged
+        }
 
         private void Schedule_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            e.Handled = true;   // ne pas remonter jusqu'au TabControl
+            ShowSchedulePreview(LstSchedules.SelectedItem as ScheduleItem);
+        }
+
+        private void ShowSchedulePreview(ScheduleItem item)
+        {
             ScheduleColumns.Clear();
             TxtSchedSkipped.Text = "";
-            if (!(LstSchedules.SelectedItem is ScheduleItem item)) return;
-            if (!(_doc.GetElement(item.Info.Id) is DB.ViewSchedule schedule)) return;
+            if (item == null)
+            {
+                TxtSchedInfo.Text = "Cliquez sur une nomenclature pour voir les colonnes exportées.";
+                return;
+            }
 
-            ScheduleContent content;
-            using (new WaitCursor())
-                content = ScheduleScanner.BuildEditable(_doc, schedule);
+            long key = item.Info.Id.Value;
+            if (!_scheduleCache.TryGetValue(key, out ScheduleContent content))
+            {
+                if (!(_doc.GetElement(item.Info.Id) is DB.ViewSchedule schedule)) return;
+                try
+                {
+                    using (new WaitCursor())
+                        content = ScheduleScanner.BuildEditable(_doc, schedule);
+                }
+                catch (Exception ex)
+                {
+                    TxtSchedInfo.Text = $"{item.Info.Name} : lecture impossible ({ex.Message}).";
+                    return;
+                }
+                _scheduleCache[key] = content;
+            }
 
             foreach (ParamDescriptor d in content.Descriptors) ScheduleColumns.Add(new ParamItem(d));
-            TxtSchedInfo.Text = $"{item.Info.Name} – {item.Info.Kind}\n{content.Rows.Count} élément(s), {content.Descriptors.Count} colonne(s) en mode Modifiable.";
+            int checkedCount = Schedules.Count(s => s.IsChecked);
+            TxtSchedInfo.Text = $"{item.Info.Name} – {item.Info.Kind}\n"
+                                + $"{content.Rows.Count} élément(s), {content.Descriptors.Count} colonne(s) en mode Modifiable."
+                                + (checkedCount > 1 ? $"\n({checkedCount} nomenclatures cochées : une feuille Excel par nomenclature.)" : "");
             if (content.Skipped.Count > 0)
                 TxtSchedSkipped.Text = "Colonnes calculées (formules, totaux…), présentes seulement en mode Mise en forme : "
                                        + string.Join(", ", content.Skipped);

@@ -28,6 +28,7 @@ namespace RevitExcelLink.Core
         {
             public ChangeItem Item;
             public string Canonical;
+            public ParamOwner Owner;
         }
 
         public static ImportAnalysis Analyze(Document doc, string path)
@@ -154,7 +155,9 @@ namespace RevitExcelLink.Core
                     if (hasOrig && raw == orig) continue;                       // cellule non modifiée
                     if (hasOrig && orig == ValueCodec.NotApplicable && raw.Length == 0) continue;
 
-                    Element owner = spec.Owner == ParamOwner.Type && !byType ? type : element;
+                    Element owner = Owners.Resolve(doc, element, spec.Owner, spec.PhaseId, byType);
+                    // Ligne sans pièce / espace : rien à faire si la cellule est restée vide
+                    if (owner == null && Owners.IsRelated(spec.Owner) && raw.Length == 0) continue;
                     Parameter p = ParamKeys.Find(owner, spec.Key);
 
                     var item = new ChangeItem
@@ -214,11 +217,11 @@ namespace RevitExcelLink.Core
                         item.Apply = true;
                     }
 
-                    if (spec.Owner == ParamOwner.Type && !byType)
+                    if (Owners.IsShared(spec.Owner) && !(byType && spec.Owner == ParamOwner.Type))
                     {
                         string groupKey = item.TargetUid + "|" + spec.ColumnKey;
                         if (!typeEdits.TryGetValue(groupKey, out var list)) typeEdits[groupKey] = list = new List<TypeEdit>();
-                        list.Add(new TypeEdit { Item = item, Canonical = parsed.Ok ? parsed.Canonical : raw });
+                        list.Add(new TypeEdit { Item = item, Canonical = parsed.Ok ? parsed.Canonical : raw, Owner = spec.Owner });
                     }
                     else
                     {
@@ -237,7 +240,9 @@ namespace RevitExcelLink.Core
                     first.Status = ChangeStatus.Error;
                     first.Apply = false;
                     first.NewValue = string.Join(" / ", distinct);
-                    first.Message = "Valeurs différentes saisies pour le même type : harmonisez-les dans Excel.";
+                    first.Message = edits[0].Owner == ParamOwner.Type
+                        ? "Valeurs différentes saisies pour le même type : harmonisez-les dans Excel."
+                        : "Valeurs différentes saisies pour le même élément lié (pièce, espace…) : harmonisez-les dans Excel.";
                 }
                 else
                 {
@@ -246,7 +251,7 @@ namespace RevitExcelLink.Core
                         first.Status = ChangeStatus.Conflict;
                         first.Apply = false;
                     }
-                    string note = $"Paramètre de type, modifié sur {edits.Count} ligne(s) : s'applique à toutes les occurrences du type.";
+                    string note = $"{Owners.Label(edits[0].Owner)}, modifié sur {edits.Count} ligne(s) : s'applique à {Owners.SharedNote(edits[0].Owner)}.";
                     first.Message = string.IsNullOrEmpty(first.Message) ? note : first.Message + " " + note;
                 }
                 result.Items.Add(first);

@@ -34,6 +34,7 @@ namespace RevitExcelLink.Core
         // Couleurs Helora (même logique que la légende de l'onglet Instructions)
         public static readonly XLColor HeaderInstance = Brand.Turquoise;
         public static readonly XLColor HeaderType = Brand.Turquoise50;
+        public static readonly XLColor HeaderRelated = Brand.Turquoise20;
         public static readonly XLColor HeaderReadOnly = XLColor.FromHtml("#E6ECED");
         public static readonly XLColor HeaderReadOnlyText = Brand.Orange;   // petite touche d'orange = signal
         public static readonly XLColor HeaderFixed = Brand.DarkGreen;

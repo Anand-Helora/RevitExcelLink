@@ -195,12 +195,18 @@ namespace RevitExcelLink.Core
                         h.Style.Fill.BackgroundColor = HeaderType;
                         h.Style.Font.FontColor = Brand.DarkGreen;
                     }
+                    else if (Owners.IsRelated(d.Owner))
+                    {
+                        h.Style.Fill.BackgroundColor = HeaderRelated;
+                        h.Style.Font.FontColor = Brand.DarkGreen;
+                    }
                     else
                     {
                         h.Style.Fill.BackgroundColor = HeaderInstance;
                         h.Style.Font.FontColor = XLColor.White;
                     }
-                    h.CreateComment().AddText(d.Origin + (d.IsReadOnly ? " – lecture seule" : ""));
+                    h.CreateComment().AddText(d.Origin + (d.IsReadOnly ? " – lecture seule" : "")
+                        + (Owners.IsRelated(d.Owner) ? "\nUne modification s'applique à " + Owners.SharedNote(d.Owner) + "." : ""));
                 }
 
                 // --- Données
@@ -221,7 +227,7 @@ namespace RevitExcelLink.Core
                         int c = FirstParamCol + j;
                         IXLCell cell = ws.Cell(r, c);
 
-                        Element owner = col.Owner == ParamOwner.Type && !src.ByType ? type : e;
+                        Element owner = Owners.Resolve(doc, e, col.Owner, col.PhaseId, src.ByType);
                         Parameter p = ParamKeys.Find(owner, col.Key);
                         if (p == null)
                         {
@@ -240,7 +246,7 @@ namespace RevitExcelLink.Core
                             cell.Style.Fill.BackgroundColor = CellReadOnly;
                             cell.Style.Font.FontColor = CellReadOnlyText;
                         }
-                        else if (col.Owner == ParamOwner.Type && !src.ByType)
+                        else if (Owners.IsShared(col.Owner) && !(src.ByType && col.Owner == ParamOwner.Type))
                         {
                             cell.Style.Fill.BackgroundColor = CellTypeParam;
                         }
@@ -346,7 +352,7 @@ namespace RevitExcelLink.Core
             int checkedCount = 0;
             foreach (Element e in rows)
             {
-                Element owner = col.Owner == ParamOwner.Type && !byType ? doc.GetElement(e.GetTypeId()) : e;
+                Element owner = Owners.Resolve(doc, e, col.Owner, col.PhaseId, byType);
                 Parameter p = ParamKeys.Find(owner, col.Key);
                 if (p == null) continue;
                 ElementId id = p.AsElementId();
@@ -469,6 +475,7 @@ namespace RevitExcelLink.Core
                 }
                 Legend(HeaderInstance, XLColor.White, "Occurrence", "Paramètre d'occurrence, modifiable.");
                 Legend(HeaderType, Brand.DarkGreen, "Type", "Paramètre de type : la modification s'applique à toutes les occurrences du type (cellules turquoise clair).");
+                Legend(HeaderRelated, Brand.DarkGreen, "Élément lié", "Paramètre d'un élément lié (pièce de départ / d'arrivée, pièce, espace, projet) : la modification s'applique à cet élément, donc à toutes ses lignes.");
                 Legend(HeaderReadOnly, HeaderReadOnlyText, "Lecture seule", "Valeur non modifiable : les changements seront ignorés à l'import.");
                 Legend(CellAbsent, Brand.DarkGreen, "Absent", "Ce paramètre n'existe pas pour cet élément.");
                 Legend(HeaderFixed, XLColor.White, "Identification", "Colonnes d'identification : ne pas modifier.");
@@ -482,7 +489,7 @@ namespace RevitExcelLink.Core
                     "Les nombres sont dans l'unité indiquée entre crochets dans l'en-tête (ex. [mm]).",
                     "Oui / Non et les éléments liés (niveau, phase, matériau…) se choisissent dans la liste déroulante.",
                     "Seules les cellules modifiées sont réimportées. Ajouter ou supprimer des lignes n'a aucun effet dans Revit.",
-                    "Pour un paramètre de type, saisissez la même valeur sur toutes les lignes du type que vous modifiez.",
+                    "Pour un paramètre de type ou d'élément lié, la valeur est partagée : si vous la modifiez sur plusieurs lignes, saisissez partout la même.",
                     "Enregistrez le fichier avant de l'importer dans Revit.",
                 };
                 foreach (string rule in rules) Line("•", rule);

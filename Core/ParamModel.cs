@@ -5,7 +5,17 @@ using Autodesk.Revit.DB;
 
 namespace RevitExcelLink.Core
 {
-    public enum ParamOwner { Instance, Type }
+    /// <summary>Élément qui porte la valeur d'une colonne.</summary>
+    public enum ParamOwner
+    {
+        Instance,     // l'élément de la ligne
+        Type,         // son type
+        FromRoom,     // pièce de départ (portes, fenêtres…)
+        ToRoom,       // pièce d'arrivée
+        Room,         // pièce qui contient l'élément
+        Space,        // espace MEP qui contient l'élément
+        ProjectInfo   // informations sur le projet
+    }
 
     public enum ExportScope { WholeModel, ActiveView, Selection }
 
@@ -19,9 +29,114 @@ namespace RevitExcelLink.Core
         public StorageType Storage { get; set; }
         public ForgeTypeId DataType { get; set; }
         public string Origin { get; set; }         // "partagé", "intégré", "projet/famille"
+        public long PhaseId { get; set; } = -1;    // phase de la nomenclature, pour retrouver les pièces
 
         /// <summary>Identifiant unique dans une liste : propriétaire + clé.</summary>
-        public string Id => (Owner == ParamOwner.Type ? "T|" : "I|") + Key;
+        public string Id => Owners.Code(Owner) + "|" + Key;
+    }
+
+    /// <summary>Codes, libellés et résolution des « éléments liés » (pièce, espace, projet…).</summary>
+    public static class Owners
+    {
+        public static string Code(ParamOwner o)
+        {
+            switch (o)
+            {
+                case ParamOwner.Type: return "T";
+                case ParamOwner.FromRoom: return "F";
+                case ParamOwner.ToRoom: return "O";
+                case ParamOwner.Room: return "R";
+                case ParamOwner.Space: return "E";
+                case ParamOwner.ProjectInfo: return "P";
+                default: return "I";
+            }
+        }
+
+        public static bool TryParse(string code, out ParamOwner o)
+        {
+            switch (code)
+            {
+                case "I": o = ParamOwner.Instance; return true;
+                case "T": o = ParamOwner.Type; return true;
+                case "F": o = ParamOwner.FromRoom; return true;
+                case "O": o = ParamOwner.ToRoom; return true;
+                case "R": o = ParamOwner.Room; return true;
+                case "E": o = ParamOwner.Space; return true;
+                case "P": o = ParamOwner.ProjectInfo; return true;
+                default: o = ParamOwner.Instance; return false;
+            }
+        }
+
+        /// <summary>Valeur partagée par plusieurs lignes (type, pièce…) : une modification s'applique à toutes.</summary>
+        public static bool IsShared(ParamOwner o) => o != ParamOwner.Instance;
+
+        public static bool IsRelated(ParamOwner o) => o != ParamOwner.Instance && o != ParamOwner.Type;
+
+        public static string Label(ParamOwner o)
+        {
+            switch (o)
+            {
+                case ParamOwner.Type: return "Paramètre de type";
+                case ParamOwner.FromRoom: return "Paramètre de la pièce de départ";
+                case ParamOwner.ToRoom: return "Paramètre de la pièce d'arrivée";
+                case ParamOwner.Room: return "Paramètre de la pièce";
+                case ParamOwner.Space: return "Paramètre de l'espace";
+                case ParamOwner.ProjectInfo: return "Information sur le projet";
+                default: return "Paramètre d'occurrence";
+            }
+        }
+
+        public static string SharedNote(ParamOwner o)
+        {
+            switch (o)
+            {
+                case ParamOwner.Type: return "toutes les occurrences du type";
+                case ParamOwner.ProjectInfo: return "tout le projet";
+                case ParamOwner.Space: return "l'espace (et toutes ses lignes)";
+                default: return "la pièce (et toutes ses lignes)";
+            }
+        }
+
+        /// <summary>Retrouve l'élément qui porte la valeur pour la ligne <paramref name="e"/>.</summary>
+        public static Element Resolve(Document doc, Element e, ParamOwner owner, long phaseId, bool rowsAreTypes)
+        {
+            if (e == null) return null;
+            try
+            {
+                switch (owner)
+                {
+                    case ParamOwner.Instance: return e;
+                    case ParamOwner.Type: return rowsAreTypes ? e : doc.GetElement(e.GetTypeId());
+                    case ParamOwner.ProjectInfo: return doc.ProjectInformation;
+                }
+
+                Phase phase = phaseId > 0 ? doc.GetElement(new ElementId(phaseId)) as Phase : null;
+                if (e is FamilyInstance fi)
+                {
+                    switch (owner)
+                    {
+                        case ParamOwner.FromRoom: return phase != null ? fi.get_FromRoom(phase) : fi.FromRoom;
+                        case ParamOwner.ToRoom: return phase != null ? fi.get_ToRoom(phase) : fi.ToRoom;
+                        case ParamOwner.Room: return phase != null ? fi.get_Room(phase) : fi.Room;
+                        case ParamOwner.Space: return phase != null ? fi.get_Space(phase) : fi.Space;
+                    }
+                }
+
+                // Autres éléments : pièce ou espace au point d'insertion
+                XYZ point = (e.Location as LocationPoint)?.Point
+                            ?? (e.Location as LocationCurve)?.Curve?.Evaluate(0.5, true);
+                if (point == null) return null;
+                if (owner == ParamOwner.Room)
+                    return phase != null ? doc.GetRoomAtPoint(point, phase) : doc.GetRoomAtPoint(point);
+                if (owner == ParamOwner.Space && phase != null)
+                    return doc.GetSpaceAtPoint(point, phase);
+            }
+            catch
+            {
+                // élément sans pièce, phase invalide…
+            }
+            return null;
+        }
     }
 
     public static class ParamKeys

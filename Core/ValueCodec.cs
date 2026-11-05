@@ -34,31 +34,36 @@ namespace RevitExcelLink.Core
         public ForgeTypeId Unit { get; set; }      // unité d'affichage utilisée dans Excel (null = pas de conversion)
         public string RefClass { get; set; }       // pour les paramètres ElementId : classe des éléments référencés
         public string Name { get; set; }           // nom lisible (ligne d'en-tête)
+        public long PhaseId { get; set; } = -1;    // pour les pièces / espaces
 
         public bool IsYesNo => Storage == StorageType.Integer && Spec != null
                                && (Spec.TypeId ?? "").StartsWith("autodesk.spec:spec.bool", StringComparison.OrdinalIgnoreCase);
 
         public bool IsTextColumn => Storage == StorageType.String || Storage == StorageType.ElementId || IsYesNo;
 
-        public string ColumnKey => (Owner == ParamOwner.Type ? "T|" : "I|") + Key;
+        public string ColumnKey => Owners.Code(Owner) + "|" + Key;
 
         public string Serialize() => string.Join("|",
-            Owner == ParamOwner.Type ? "T" : "I",
+            Owners.Code(Owner),
             Key,
             ((int)Storage).ToString(CultureInfo.InvariantCulture),
             Spec?.TypeId ?? "",
             Unit?.TypeId ?? "",
-            RefClass ?? "");
+            RefClass ?? "",
+            PhaseId.ToString(CultureInfo.InvariantCulture));
 
         public static ColumnSpec TryParse(string s, string header)
         {
             if (string.IsNullOrEmpty(s)) return null;
             string[] f = s.Split('|');
-            if (f.Length < 6 || (f[0] != "I" && f[0] != "T")) return null;
+            if (f.Length < 6 || !Owners.TryParse(f[0], out ParamOwner owner)) return null;
             if (!int.TryParse(f[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int storage)) return null;
+            long phase = -1;
+            if (f.Length > 6) long.TryParse(f[6], NumberStyles.Integer, CultureInfo.InvariantCulture, out phase);
             return new ColumnSpec
             {
-                Owner = f[0] == "T" ? ParamOwner.Type : ParamOwner.Instance,
+                Owner = owner,
+                PhaseId = phase,
                 Key = f[1],
                 Storage = (StorageType)storage,
                 Spec = string.IsNullOrEmpty(f[3]) ? null : new ForgeTypeId(f[3]),
@@ -77,7 +82,8 @@ namespace RevitExcelLink.Core
                 Key = d.Key,
                 Storage = d.Storage,
                 Spec = d.DataType,
-                Name = d.Name
+                Name = d.Name,
+                PhaseId = d.PhaseId
             };
 
             string unitLabel = null;

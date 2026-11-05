@@ -85,6 +85,7 @@ namespace RevitExcelLink.Core
 
             var fieldMap = new Dictionary<int, (string Key, ParamOwner Owner)>();
             var seen = new HashSet<string>();
+            long phaseId = PhaseOf(schedule);
 
             foreach (ScheduleFieldId fieldId in def.GetFieldOrder())
             {
@@ -99,16 +100,26 @@ namespace RevitExcelLink.Core
                 fieldMap[fieldId.IntegerValue] = (key, owner);
                 if (field.IsHidden) continue;
 
-                string id = (owner == ParamOwner.Type ? "T|" : "I|") + key;
+                string id = Owners.Code(owner) + "|" + key;
                 if (!seen.Add(id)) continue;
 
-                ParamDescriptor desc = Describe(doc, rows, key, owner, heading);
+                ParamDescriptor desc = Describe(doc, rows, key, owner, heading, phaseId);
                 if (desc == null) { content.Skipped.Add(heading); continue; }
                 content.Descriptors.Add(desc);
             }
 
-            content.Rows.AddRange(SortLikeSchedule(doc, def, rows, fieldMap));
+            content.Rows.AddRange(SortLikeSchedule(doc, def, rows, fieldMap, phaseId));
             return content;
+        }
+
+        private static long PhaseOf(ViewSchedule schedule)
+        {
+            try
+            {
+                ElementId id = schedule.get_Parameter(BuiltInParameter.VIEW_PHASE)?.AsElementId();
+                return id != null && id != ElementId.InvalidElementId ? id.Value : -1;
+            }
+            catch { return -1; }
         }
 
         private static string Heading(ScheduleField field)
@@ -128,6 +139,11 @@ namespace RevitExcelLink.Core
             {
                 case ScheduleFieldType.Instance: owner = ParamOwner.Instance; break;
                 case ScheduleFieldType.ElementType: owner = ParamOwner.Type; break;
+                case ScheduleFieldType.FromRoom: owner = ParamOwner.FromRoom; break;
+                case ScheduleFieldType.ToRoom: owner = ParamOwner.ToRoom; break;
+                case ScheduleFieldType.Room: owner = ParamOwner.Room; break;
+                case ScheduleFieldType.Space: owner = ParamOwner.Space; break;
+                case ScheduleFieldType.ProjectInfo: owner = ParamOwner.ProjectInfo; break;
                 default: return false;   // formules, totaux, pourcentages, quantités de matériaux…
             }
 
@@ -154,13 +170,13 @@ namespace RevitExcelLink.Core
             return false;
         }
 
-        private static ParamDescriptor Describe(Document doc, List<Element> rows, string key, ParamOwner owner, string heading)
+        private static ParamDescriptor Describe(Document doc, List<Element> rows, string key, ParamOwner owner, string heading, long phaseId)
         {
             ParamDescriptor desc = null;
             int n = 0;
             foreach (Element e in rows)
             {
-                Element target = owner == ParamOwner.Type ? doc.GetElement(e.GetTypeId()) : e;
+                Element target = Owners.Resolve(doc, e, owner, phaseId, false);
                 Parameter p = ParamKeys.Find(target, key);
                 if (p == null || p.StorageType == StorageType.None) continue;
 
@@ -174,7 +190,8 @@ namespace RevitExcelLink.Core
                         IsReadOnly = p.IsReadOnly,
                         Storage = p.StorageType,
                         DataType = ParamKeys.SafeDataType(p),
-                        Origin = ParamKeys.OriginOf(p) + " – " + p.Definition.Name
+                        Origin = Owners.Label(owner) + " – " + p.Definition.Name,
+                        PhaseId = phaseId
                     };
                 }
                 else
@@ -188,7 +205,7 @@ namespace RevitExcelLink.Core
 
         /// <summary>Reproduit l'ordre de tri/regroupement défini dans la nomenclature.</summary>
         private static IEnumerable<Element> SortLikeSchedule(Document doc, ScheduleDefinition def, List<Element> rows,
-                                                            Dictionary<int, (string Key, ParamOwner Owner)> fieldMap)
+                                                            Dictionary<int, (string Key, ParamOwner Owner)> fieldMap, long phaseId)
         {
             var sorts = new List<(string Key, ParamOwner Owner, bool Descending)>();
             try
@@ -207,7 +224,7 @@ namespace RevitExcelLink.Core
             var keyed = rows.Select(e => new
             {
                 Element = e,
-                Keys = sorts.Select(s => SortValue(doc, e, s.Key, s.Owner)).ToArray()
+                Keys = sorts.Select(s => SortValue(doc, e, s.Key, s.Owner, phaseId)).ToArray()
             }).ToList();
 
             keyed.Sort((a, b) =>
@@ -222,9 +239,9 @@ namespace RevitExcelLink.Core
             return keyed.Select(k => k.Element);
         }
 
-        private static object SortValue(Document doc, Element e, string key, ParamOwner owner)
+        private static object SortValue(Document doc, Element e, string key, ParamOwner owner, long phaseId)
         {
-            Element target = owner == ParamOwner.Type ? doc.GetElement(e.GetTypeId()) : e;
+            Element target = Owners.Resolve(doc, e, owner, phaseId, false);
             Parameter p = ParamKeys.Find(target, key);
             if (p == null || !p.HasValue) return null;
             switch (p.StorageType)

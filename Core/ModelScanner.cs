@@ -112,7 +112,7 @@ namespace RevitExcelLink.Core
             if (p?.Definition == null || p.StorageType == StorageType.None) return;
 
             string key = ParamKeys.KeyOf(p);
-            string id = (owner == ParamOwner.Type ? "T|" : "I|") + key;
+            string id = Owners.Code(owner) + "|" + key;
 
             if (map.TryGetValue(id, out ParamDescriptor existing))
             {
